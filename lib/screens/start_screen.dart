@@ -14,12 +14,15 @@ class StartScreen extends StatelessWidget {
         backgroundColor: Colors.black,
         body: Stack(
           children: [
-            // Background collage
-            Positioned.fill(
+            // Background collage placed upper-right like original
+            Positioned(
+              top: 0,
+              right: 0,
               child: Opacity(
-                opacity: 0.25,
+                opacity: 0.30,
                 child: Image.asset(
                   'assets/images/kpop_collage.png',
+                  width: size.width * 0.85,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -32,7 +35,7 @@ class StartScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    SizedBox(height: size.height * 0.45),
+                    SizedBox(height: size.height * 0.42),
 
                     // Spotify logo
                     Center(
@@ -63,7 +66,7 @@ class StartScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 28),
 
-                    // Sign up Free Button
+                    // Sign up free button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -148,7 +151,7 @@ class StartScreen extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(asset, height: 20),
+            Image.asset(asset, height: 20, width: 20, fit: BoxFit.contain),
             const SizedBox(width: 12),
             Text(
               text,
