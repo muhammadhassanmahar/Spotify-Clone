@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'signup4_screen.dart'; // <-- Make sure this file exists
 
 class Signup3Screen extends StatefulWidget {
   const Signup3Screen({super.key});
@@ -9,6 +10,14 @@ class Signup3Screen extends StatefulWidget {
 
 class _Signup3ScreenState extends State<Signup3Screen> {
   final TextEditingController genderController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    genderController.addListener(() {
+      setState(() {}); // Refresh UI when typing
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +75,6 @@ class _Signup3ScreenState extends State<Signup3Screen> {
                   TextField(
                     controller: genderController,
                     style: const TextStyle(color: Colors.white),
-                    onChanged: (value) => setState(() {}),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.grey.shade800,
@@ -76,7 +84,8 @@ class _Signup3ScreenState extends State<Signup3Screen> {
                         borderRadius: BorderRadius.circular(6),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
                       suffixIcon: genderController.text.isNotEmpty
                           ? const Icon(Icons.check, color: Colors.white)
                           : null,
@@ -87,14 +96,24 @@ class _Signup3ScreenState extends State<Signup3Screen> {
 
                   Center(
                     child: ElevatedButton(
-                      onPressed: genderController.text.isNotEmpty ? () {} : null,
+                      onPressed: genderController.text.isNotEmpty
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const Signup4Screen(),
+                                ),
+                              );
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: genderController.text.isNotEmpty
-                            ? Colors.white
+                            ? Colors.green
                             : Colors.grey.shade700,
-                        foregroundColor: Colors.black,
                         disabledBackgroundColor: Colors.grey.shade700,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
