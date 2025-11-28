@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/screens/signup_screen2.dart';
-import 'signup2_screen.dart'; // ← Make sure this import exists
 
 class Signup1Screen extends StatefulWidget {
   const Signup1Screen({super.key});
