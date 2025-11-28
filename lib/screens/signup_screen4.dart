@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'artists_screen.dart';   // <<--- ADD THIS IMPORT
 
 class SignupScreen4 extends StatefulWidget {
   const SignupScreen4({super.key});
@@ -139,8 +140,13 @@ class _SignupScreen4State extends State<SignupScreen4> {
             GestureDetector(
               onTap: isButtonActive
                   ? () {
-                      // Navigation yahan add karein
-                      // Navigator.pushNamed(context, '/nextScreen');
+                      // ★ NAVIGATE TO ARTISTS SCREEN ★
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ArtistsScreen(),
+                        ),
+                      );
                     }
                   : null,
               child: Container(
