@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:spotify/screens/signup_screen2.dart';
+import 'signup2_screen.dart'; // ← Make sure this import exists
 
-class Signup1Screen extends StatelessWidget {
+class Signup1Screen extends StatefulWidget {
   const Signup1Screen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final TextEditingController emailController = TextEditingController();
+  State<Signup1Screen> createState() => _Signup1ScreenState();
+}
 
+class _Signup1ScreenState extends State<Signup1Screen> {
+  final TextEditingController emailController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    emailController.addListener(() {
+      setState(() {}); // Refresh UI when typing
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: LayoutBuilder(
@@ -81,13 +96,25 @@ class Signup1Screen extends StatelessWidget {
 
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: emailController.text.isNotEmpty
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const Signup2Screen(),
+                                ),
+                              );
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey.shade700,
+                        backgroundColor: emailController.text.isNotEmpty
+                            ? Colors.green
+                            : Colors.grey.shade700,
                         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
+                        disabledBackgroundColor: Colors.grey.shade700,
                       ),
                       child: const Text(
                         "Next",
