@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:spotify/screens/signup_screen3.dart';
+import 'signup3_screen.dart'; // <-- Make sure this file exists
 
 class Signup2Screen extends StatefulWidget {
   const Signup2Screen({super.key});
@@ -10,6 +12,14 @@ class Signup2Screen extends StatefulWidget {
 class _Signup2ScreenState extends State<Signup2Screen> {
   final TextEditingController passwordController = TextEditingController();
   bool obscure = true;
+
+  @override
+  void initState() {
+    super.initState();
+    passwordController.addListener(() {
+      setState(() {}); // Refresh UI when typing
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,9 +110,21 @@ class _Signup2ScreenState extends State<Signup2Screen> {
 
                   Center(
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: passwordController.text.isNotEmpty
+                          ? () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const Signup3Screen(),
+                                ),
+                              );
+                            }
+                          : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey.shade700,
+                        backgroundColor: passwordController.text.isNotEmpty
+                            ? Colors.green
+                            : Colors.grey.shade700,
+                        disabledBackgroundColor: Colors.grey.shade700,
                         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
