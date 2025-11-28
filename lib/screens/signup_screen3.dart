@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'signup4_screen.dart'; // <-- Make sure this file exists
+import 'package:spotify/screens/signup_screen4.dart';
 
 class Signup3Screen extends StatefulWidget {
-  const Signup3Screen({super.key});
+  const Signup3Screen({super.key}); // super.key used
 
   @override
   State<Signup3Screen> createState() => _Signup3ScreenState();
@@ -17,6 +17,12 @@ class _Signup3ScreenState extends State<Signup3Screen> {
     genderController.addListener(() {
       setState(() {}); // Refresh UI when typing
     });
+  }
+
+  @override
+  void dispose() {
+    genderController.dispose();
+    super.dispose();
   }
 
   @override
@@ -35,19 +41,16 @@ class _Signup3ScreenState extends State<Signup3Screen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 20),
-
-                  // Back button
                   Row(
                     children: [
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                        child: const Icon(Icons.arrow_back,
+                            color: Colors.white, size: 28),
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 30),
-
                   const Center(
                     child: Text(
                       "Create account",
@@ -58,9 +61,7 @@ class _Signup3ScreenState extends State<Signup3Screen> {
                       ),
                     ),
                   ),
-
                   const SizedBox(height: 40),
-
                   const Text(
                     "What's your gender?",
                     style: TextStyle(
@@ -69,9 +70,7 @@ class _Signup3ScreenState extends State<Signup3Screen> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-
                   const SizedBox(height: 10),
-
                   TextField(
                     controller: genderController,
                     style: const TextStyle(color: Colors.white),
@@ -84,16 +83,14 @@ class _Signup3ScreenState extends State<Signup3Screen> {
                         borderRadius: BorderRadius.circular(6),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 18),
                       suffixIcon: genderController.text.isNotEmpty
                           ? const Icon(Icons.check, color: Colors.white)
                           : null,
                     ),
                   ),
-
                   const SizedBox(height: 40),
-
                   Center(
                     child: ElevatedButton(
                       onPressed: genderController.text.isNotEmpty
@@ -101,7 +98,7 @@ class _Signup3ScreenState extends State<Signup3Screen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const Signup4Screen(),
+                                  builder: (context) => const SignupScreen4(),
                                 ),
                               );
                             }

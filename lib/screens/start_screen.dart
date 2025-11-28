@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:spotify/screens/signup_screen1.dart'; // Import your signup screen
 
 class StartScreen extends StatelessWidget {
   const StartScreen({super.key});
@@ -14,7 +15,6 @@ class StartScreen extends StatelessWidget {
         backgroundColor: Colors.black,
         body: Stack(
           children: [
-            // Background collage placed upper-right like original
             Positioned(
               top: 0,
               right: 0,
@@ -27,8 +27,6 @@ class StartScreen extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Content
             SafeArea(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -36,8 +34,6 @@ class StartScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     SizedBox(height: size.height * 0.42),
-
-                    // Spotify logo
                     Center(
                       child: Image.asset(
                         'assets/images/logo.png',
@@ -45,7 +41,6 @@ class StartScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-
                     const Text(
                       'Millions of Songs.',
                       style: TextStyle(
@@ -66,7 +61,7 @@ class StartScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 28),
 
-                    // Sign up free button
+                    // Sign up free button → Navigate to Signup3Screen
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -77,7 +72,14 @@ class StartScreen extends StatelessWidget {
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const Signup1Screen(),
+                            ),
+                          );
+                        },
                         child: const Text(
                           'Sign up free',
                           style: TextStyle(
@@ -114,7 +116,6 @@ class StartScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
 
-                    // Log in
                     GestureDetector(
                       onTap: () {},
                       child: const Text(
@@ -136,7 +137,11 @@ class StartScreen extends StatelessWidget {
     );
   }
 
-  Widget _socialButton({required String asset, required String text, required VoidCallback onTap}) {
+  Widget _socialButton({
+    required String asset,
+    required String text,
+    required VoidCallback onTap,
+  }) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton(
