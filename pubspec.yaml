@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
+  intl: ^0.18.1   # <- Added intl package for date/time formatting
 
 dev_dependencies:
   flutter_test:
@@ -29,5 +30,3 @@ flutter:
     - assets/icons/apple.png
     - assets/icons/google.png
     - assets/icons/facebook.png
-
-
