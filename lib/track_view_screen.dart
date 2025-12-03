@@ -18,20 +18,27 @@ class TrackViewScreen extends StatelessWidget {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.keyboard_arrow_down,
-                        size: 30, color: Colors.white),
+                    onTap: () {
+                      // NAVIGATE TO TRACK SCREEN
+                      Navigator.pushNamed(context, "/track_screen");
+                    },
+                    child: const Icon(
+                      Icons.keyboard_arrow_down,
+                      size: 30,
+                      color: Colors.white,
+                    ),
                   ),
                   const Spacer(),
                   const Text(
                     "1 (Remastered)",
                     style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500),
+                      color: Colors.white70,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                   const Spacer(),
-                  const Icon(Icons.more_vert, color: Colors.white)
+                  const Icon(Icons.more_vert, color: Colors.white),
                 ],
               ),
             ),
@@ -94,14 +101,17 @@ class TrackViewScreen extends StatelessWidget {
                     activeColor: Colors.white,
                     inactiveColor: Colors.white24,
                   ),
-
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text("0:38",
-                          style: TextStyle(color: Colors.white70, fontSize: 12)),
-                      Text("-1:18",
-                          style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text(
+                        "0:38",
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
+                      Text(
+                        "-1:18",
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
+                      ),
                     ],
                   )
                 ],
@@ -160,11 +170,14 @@ class TrackViewScreen extends StatelessWidget {
               child: Row(
                 children: const [
                   SizedBox(width: 15),
-                  Text("Lyrics",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600)),
+                  Text(
+                    "Lyrics",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   Spacer(),
                   Text(
                     "MORE",
