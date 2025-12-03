@@ -15,7 +15,6 @@ class SongShareScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-    final width = MediaQuery.of(context).size.width;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -93,7 +92,7 @@ class SongShareScreen extends StatelessWidget {
               runSpacing: 25,
               children: [
                 _shareButton(Icons.link, "Copy Link"),
-                _shareButton(Icons.whatsapp, "WhatsApp"),
+                _shareButton(Icons.share, "WhatsApp"),
                 _shareButton(Icons.alternate_email, "Twitter"),
                 _shareButton(Icons.message, "Messages"),
                 _shareButton(Icons.more_horiz, "More"),
