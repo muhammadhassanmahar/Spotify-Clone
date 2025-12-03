@@ -22,19 +22,21 @@ class AlbumControlScreen extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10),
                     image: const DecorationImage(
                       fit: BoxFit.cover,
-                      image: AssetImage("assets/images/album.jpg"), // CHANGE IMAGE HERE
+                      image: AssetImage("assets/images/album.jpg"), // CHANGE IMAGE
                     ),
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
 
-              /// ---- Album title ----
+              /// ---- Album Title ----
               const Text(
                 "1(Remastered)",
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 5),
+
               const Text(
                 "The Beatles",
                 style: TextStyle(fontSize: 16, color: Colors.grey),
@@ -44,25 +46,25 @@ class AlbumControlScreen extends StatelessWidget {
 
               /// ---- OPTIONS LIST ----
               buildOption(Icons.favorite_border, "Like", () {
-                print("Liked");
+                debugPrint("Liked");
               }),
               buildOption(Icons.person_outline, "View artist", () {
-                print("View Artist");
+                debugPrint("View Artist");
               }),
               buildOption(Icons.share_outlined, "Share", () {
-                print("Share");
+                debugPrint("Share");
               }),
               buildOption(Icons.favorite_outline, "Like all songs", () {
-                print("Like All Songs");
+                debugPrint("Like All Songs");
               }),
               buildOption(Icons.playlist_add_outlined, "Add to playlist", () {
-                print("Add to playlist");
+                debugPrint("Add to playlist");
               }),
               buildOption(Icons.queue_music_outlined, "Add to queue", () {
-                print("Add to queue");
+                debugPrint("Add to queue");
               }),
               buildOption(Icons.radio, "Go to radio", () {
-                print("Go to radio");
+                debugPrint("Go to radio");
               }),
 
               const SizedBox(height: 40),
@@ -70,7 +72,7 @@ class AlbumControlScreen extends StatelessWidget {
               /// ---- CLOSE BUTTON ----
               GestureDetector(
                 onTap: () {
-                  Navigator.pop(context); // go back to Album View Screen
+                  Navigator.pop(context);
                 },
                 child: const Padding(
                   padding: EdgeInsets.all(15),
@@ -83,6 +85,7 @@ class AlbumControlScreen extends StatelessWidget {
                   ),
                 ),
               ),
+
               const SizedBox(height: 20),
             ],
           ),
@@ -104,7 +107,7 @@ class AlbumControlScreen extends StatelessWidget {
             Text(
               text,
               style: const TextStyle(fontSize: 18, color: Colors.white),
-            )
+            ),
           ],
         ),
       ),
