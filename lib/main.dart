@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/album_view_screen.dart';
+
 import 'screens/splash_screen.dart';
 import 'screens/start_screen.dart';
 import 'screens/home_screen.dart';
@@ -8,7 +9,7 @@ import 'screens/signup_screen1.dart';
 import 'screens/signup_screen2.dart';
 import 'screens/signup_screen3.dart';
 import 'screens/search_screen.dart';
-import 'screens/album_control_screen.dart'; 
+import 'screens/album_control_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -36,8 +37,10 @@ class MyApp extends StatelessWidget {
         "/artists": (context) => const ArtistsScreen(),
         "/home": (context) => const HomeScreen(),
         "/search": (context) => const SearchScreen(),
-        "/albumView": (context) => const AlbumViewScreen(),
-        "/albumControl": (context) => const AlbumControlScreen(),
+
+        // FIXED ROUTES (snake_case)
+        "/album_view": (context) => const AlbumViewScreen(),
+        "/album_control": (context) => const AlbumControlScreen(),
       },
     );
   }

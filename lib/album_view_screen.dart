@@ -48,7 +48,7 @@ class AlbumViewScreen extends StatelessWidget {
                     // 🎤 TITLE (TAP → ALBUM CONTROL)
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, "/album-control");
+                        Navigator.pushNamed(context, "/album_control");
                       },
                       child: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16),

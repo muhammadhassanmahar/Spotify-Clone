@@ -23,7 +23,7 @@ class SearchScreen extends StatelessWidget {
       'name': '1 (Remastered)',
       'type': 'Album • The Beatles',
       'image': 'https://i.imgur.com/aR3zJ4U.png',
-      'navigate': 'album'
+      'navigate': 'album_view'
     },
     {
       'name': 'HAYES',
@@ -107,8 +107,8 @@ class SearchScreen extends StatelessWidget {
 
                     return GestureDetector(
                       onTap: () {
-                        if (item['navigate'] == 'album') {
-                          Navigator.pushNamed(context, "/album");
+                        if (item['navigate'] == 'album_view') {
+                          Navigator.pushNamed(context, "/album_view");
                         }
                       },
                       child: Container(
