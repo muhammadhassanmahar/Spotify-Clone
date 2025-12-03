@@ -83,7 +83,13 @@ class TrackScreen extends StatelessWidget {
                     option(Icons.remove_circle_outline, "Hide song"),
                     option(Icons.playlist_add, "Add to playlist"),
                     option(Icons.queue_music, "Add to queue"),
-                    option(Icons.share, "Share"),
+
+                    // ---- Updated Share option ----
+                    InkWell(
+                      onTap: () => Navigator.pushNamed(context, "/share_song"),
+                      child: option(Icons.share, "Share"),
+                    ),
+
                     option(Icons.radio, "Go to radio"),
 
                     InkWell(
