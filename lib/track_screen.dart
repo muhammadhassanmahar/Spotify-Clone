@@ -18,7 +18,7 @@ class TrackScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 12),
 
-            /// ---------- ALBUM COVER + TITLE BLOCK ----------
+            // ---------- TOP GRADIENT + TITLE ----------
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -26,7 +26,7 @@ class TrackScreen extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.center,
                   colors: [
-                    const Color(0xFF7A2E2E).withOpacity(0.95),
+                    const Color(0xFF7A2E2E).withValues(alpha: .95),
                     Colors.transparent,
                   ],
                 ),
@@ -63,7 +63,7 @@ class TrackScreen extends StatelessWidget {
                   Text(
                     "The Beatles",
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.70),
+                      color: Colors.white.withValues(alpha: 0.70),
                       fontSize: 16,
                     ),
                   ),
@@ -73,7 +73,7 @@ class TrackScreen extends StatelessWidget {
               ),
             ),
 
-            /// ---------- OPTIONS LIST ----------
+            // ---------- OPTIONS LIST ----------
             Expanded(
               child: SingleChildScrollView(
                 padding: EdgeInsets.symmetric(horizontal: w * 0.06),
@@ -86,13 +86,11 @@ class TrackScreen extends StatelessWidget {
                     option(Icons.share, "Share"),
                     option(Icons.radio, "Go to radio"),
 
-                    /// Navigate to Album
                     InkWell(
                       onTap: () => Navigator.pushNamed(context, "/album_view"),
                       child: option(Icons.album_outlined, "View album"),
                     ),
 
-                    /// Navigate to Artist
                     InkWell(
                       onTap: () => Navigator.pushNamed(context, "/artists"),
                       child: option(Icons.person_outline, "View artist"),
@@ -103,7 +101,6 @@ class TrackScreen extends StatelessWidget {
 
                     const SizedBox(height: 35),
 
-                    /// Bottom drag bar
                     Container(
                       width: 60,
                       height: 4,
@@ -115,7 +112,6 @@ class TrackScreen extends StatelessWidget {
 
                     const SizedBox(height: 18),
 
-                    /// Close Button
                     GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: const Text(
@@ -139,7 +135,7 @@ class TrackScreen extends StatelessWidget {
     );
   }
 
-  /// ---- OPTION ROW WIDGET ----
+  /// ---- OPTION ROW ----
   Widget option(IconData icon, String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 14),
