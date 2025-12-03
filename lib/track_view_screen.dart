@@ -6,28 +6,29 @@ class TrackViewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF2C0F0F), // Spotify gradient look
       body: SafeArea(
         child: Column(
           children: [
+            const SizedBox(height: 10),
+
             // ---------- TOP BAR ----------
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
                     child: const Icon(Icons.keyboard_arrow_down,
-                        size: 32, color: Colors.white),
+                        size: 30, color: Colors.white),
                   ),
                   const Spacer(),
                   const Text(
-                    "Now Playing",
+                    "1 (Remastered)",
                     style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
+                        color: Colors.white70,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500),
                   ),
                   const Spacer(),
                   const Icon(Icons.more_vert, color: Colors.white)
@@ -35,29 +36,22 @@ class TrackViewScreen extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
 
             // ---------- ALBUM ART ----------
-            Expanded(
-              child: Center(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    width: 330,
-                    height: 330,
-                    decoration: const BoxDecoration(
-                      color: Colors.grey,
-                    ),
-                    child: Image.network(
-                      "https://i.scdn.co/image/ab67616d00001e0208dd3f0bcb7b4f31f27e5f1e",
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.network(
+                  "https://i.scdn.co/image/ab67616d00001e0208dd3f0bcb7b4f31f27e5f1e",
+                  height: 330,
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
 
-            const SizedBox(height: 10),
+            const SizedBox(height: 25),
 
             // ---------- SONG TITLE + ARTIST ----------
             Padding(
@@ -66,19 +60,19 @@ class TrackViewScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Blinding Lights",
+                    "From Me to You - Mono / Remastered",
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   Text(
-                    "The Weeknd",
+                    "The Beatles",
                     style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.70), // FIXED
-                      fontSize: 18,
+                      color: Colors.white.withValues(alpha: 0.70),
+                      fontSize: 16,
                     ),
                   ),
                 ],
@@ -94,9 +88,9 @@ class TrackViewScreen extends StatelessWidget {
                 children: [
                   Slider(
                     min: 0,
-                    max: 260,
-                    value: 80,
-                    onChanged: (_) {},
+                    max: 200,
+                    value: 38,
+                    onChanged: (v) {},
                     activeColor: Colors.white,
                     inactiveColor: Colors.white24,
                   ),
@@ -104,16 +98,12 @@ class TrackViewScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: const [
-                      Text(
-                        "1:20",
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
-                      ),
-                      Text(
-                        "4:20",
-                        style: TextStyle(color: Colors.white54, fontSize: 12),
-                      ),
+                      Text("0:38",
+                          style: TextStyle(color: Colors.white70, fontSize: 12)),
+                      Text("-1:18",
+                          style: TextStyle(color: Colors.white70, fontSize: 12)),
                     ],
-                  ),
+                  )
                 ],
               ),
             ),
@@ -122,7 +112,7 @@ class TrackViewScreen extends StatelessWidget {
 
             // ---------- MUSIC CONTROLS ----------
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: const [
@@ -133,28 +123,61 @@ class TrackViewScreen extends StatelessWidget {
                       color: Colors.white, size: 85),
                   Icon(Icons.skip_next_rounded,
                       color: Colors.white, size: 42),
-                  Icon(Icons.repeat, color: Colors.white70, size: 28),
+                  Icon(Icons.repeat, color: Colors.green, size: 28),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 35),
+
+            // ---------- DEVICE & SHARE ----------
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 30),
+              child: Row(
+                children: const [
+                  Icon(Icons.bluetooth_audio, color: Colors.green),
+                  SizedBox(width: 8),
+                  Text("BEATSPILL+",
+                      style: TextStyle(color: Colors.green)),
+                  Spacer(),
+                  Icon(Icons.share, color: Colors.white),
+                  SizedBox(width: 20),
+                  Icon(Icons.format_list_bulleted, color: Colors.white),
                 ],
               ),
             ),
 
             const SizedBox(height: 20),
 
-            // ---------- BOTTOM FOOTER ----------
-            Padding(
-              padding: const EdgeInsets.only(bottom: 30),
+            // ---------- LYRICS BUTTON ----------
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 18),
+              height: 55,
+              decoration: BoxDecoration(
+                color: const Color(0xFFB85C2F),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  Icon(Icons.bluetooth_audio, color: Colors.green),
-                  SizedBox(width: 8),
+                  SizedBox(width: 15),
+                  Text("Lyrics",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w600)),
+                  Spacer(),
                   Text(
-                    "JBL Speaker",
-                    style: TextStyle(color: Colors.green),
+                    "MORE",
+                    style: TextStyle(color: Colors.white70),
                   ),
+                  SizedBox(width: 10),
+                  Icon(Icons.keyboard_arrow_up, color: Colors.white70),
+                  SizedBox(width: 12),
                 ],
               ),
             ),
+
+            const SizedBox(height: 20),
           ],
         ),
       ),
