@@ -43,7 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             const SizedBox(height: 10),
 
             const Text(
@@ -100,7 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 10),
 
-            // Recommended Grid
             GridView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -140,18 +138,20 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      // BOTTOM NAVIGATION BAR
+      // ⭐ FIXED BOTTOM NAVIGATION BAR ⭐
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.greenAccent,
         unselectedItemColor: Colors.white54,
         currentIndex: selectedIndex,
-        onTap: (value) {
-          setState(() => selectedIndex = value);
-
-          if (value == 1) {
+        onTap: (index) {
+          // Search Icon (index 1)
+          if (index == 1) {
             Navigator.pushNamed(context, "/search");
+            return; // important: avoid updating selectedIndex
           }
+
+          setState(() => selectedIndex = index);
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),

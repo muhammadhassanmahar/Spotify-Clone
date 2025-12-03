@@ -6,6 +6,7 @@ import 'screens/artists_screen.dart';
 import 'screens/signup_screen1.dart';
 import 'screens/signup_screen2.dart';
 import 'screens/signup_screen3.dart';
+import 'screens/search_screen.dart';  // ⭐ ADD THIS
 
 void main() {
   runApp(const MyApp());
@@ -16,7 +17,6 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Spotify Clone',
@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
         "/signup3": (context) => const Signup3Screen(),
         "/artists": (context) => const ArtistsScreen(),
         "/home": (context) => const HomeScreen(),
+        "/search": (context) => const SearchScreen(),
       },
     );
   }
