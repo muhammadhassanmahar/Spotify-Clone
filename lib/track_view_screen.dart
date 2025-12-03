@@ -1,196 +1,255 @@
 import 'package:flutter/material.dart';
 
-class TrackViewScreen extends StatelessWidget {
-  const TrackViewScreen({super.key});
+class AlbumViewScreen extends StatelessWidget {
+  const AlbumViewScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
-      backgroundColor: const Color(0xFF2C0F0F), // Spotify gradient look
+      backgroundColor: const Color(0xff121212),
       body: SafeArea(
         child: Column(
           children: [
-            const SizedBox(height: 10),
-
-            // ---------- TOP BAR ----------
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      // NAVIGATE TO TRACK SCREEN
-                      Navigator.pushNamed(context, "/track_screen");
-                    },
-                    child: const Icon(
-                      Icons.keyboard_arrow_down,
-                      size: 30,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const Spacer(),
-                  const Text(
-                    "1 (Remastered)",
-                    style: TextStyle(
-                      color: Colors.white70,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const Spacer(),
-                  const Icon(Icons.more_vert, color: Colors.white),
-                ],
-              ),
+            // 🔙 BACK BUTTON
+            Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+                const Spacer(),
+              ],
             ),
 
-            const SizedBox(height: 20),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 🎵 ALBUM COVER (RESPONSIVE)
+                    Center(
+                      child: Container(
+                        width: width * 0.65,
+                        height: width * 0.65,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          image: const DecorationImage(
+                            fit: BoxFit.cover,
+                            image: NetworkImage(
+                              "https://i.scdn.co/image/ab67616d0000b27306ad03c41e6de0569681b89f",
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
 
-            // ---------- ALBUM ART ----------
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(10),
-                child: Image.network(
-                  "https://i.scdn.co/image/ab67616d00001e0208dd3f0bcb7b4f31f27e5f1e",
-                  height: 330,
-                  fit: BoxFit.cover,
+                    const SizedBox(height: 20),
+
+                    // 🎤 TITLE
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(context, "/album_control");
+                      },
+                      child: const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          "1 (Remastered)",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    // 🧑‍🎤 ARTIST ROW
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 14,
+                            backgroundImage: NetworkImage(
+                              "https://i.scdn.co/image/ab6761610000e5eb35ddc4c4c596cbcac7e0e5aa",
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            "The Beatles",
+                            style: TextStyle(
+                              color: Colors.white70,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 6),
+
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        "Album • 2000",
+                        style: TextStyle(
+                          color: Colors.white54,
+                          fontSize: 14,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // ❤️ ⬇️ ... + PLAY BUTTON
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.favorite_border,
+                              color: Colors.white, size: 28),
+                          const SizedBox(width: 18),
+
+                          const Icon(Icons.download_for_offline_outlined,
+                              color: Colors.white, size: 27),
+                          const SizedBox(width: 18),
+
+                          const Icon(Icons.more_vert,
+                              color: Colors.white, size: 28),
+                          const Spacer(),
+
+                          // 🟢 PLAY BUTTON
+                          Container(
+                            height: 60,
+                            width: 60,
+                            decoration: const BoxDecoration(
+                              color: Color(0xff1DB954),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.play_arrow,
+                                size: 40, color: Colors.black),
+                          )
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 30),
+
+                    // 🎼 TRACK LIST
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: 8,
+                      itemBuilder: (context, index) {
+                        final bool isSecond = index == 1;
+
+                        return InkWell(
+                          onTap: () {
+                            if (isSecond) {
+                              Navigator.pushNamed(context, "/track_view");
+                            }
+                          },
+                          child: ListTile(
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 16),
+
+                            leading: isSecond
+                                ? const Icon(Icons.graphic_eq,
+                                    size: 22, color: Color(0xff1DB954))
+                                : const SizedBox(width: 22),
+
+                            title: Text(
+                              index == 1
+                                  ? "From Me To You – Remastered"
+                                  : "Song ${index + 1} (Remastered)",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+
+                            subtitle: const Text(
+                              "The Beatles",
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 13,
+                              ),
+                            ),
+
+                            trailing: const Icon(Icons.more_vert,
+                                color: Colors.white),
+                          ),
+                        );
+                      },
+                    ),
+
+                    const SizedBox(height: 90),
+                  ],
                 ),
               ),
             ),
 
-            const SizedBox(height: 25),
-
-            // ---------- SONG TITLE + ARTIST ----------
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    "From Me to You - Mono / Remastered",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "The Beatles",
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.70),
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            // ---------- PROGRESS BAR ----------
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 22),
-              child: Column(
-                children: [
-                  Slider(
-                    min: 0,
-                    max: 200,
-                    value: 38,
-                    onChanged: (v) {},
-                    activeColor: Colors.white,
-                    inactiveColor: Colors.white24,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text(
-                        "0:38",
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
-                      ),
-                      Text(
-                        "-1:18",
-                        style: TextStyle(color: Colors.white70, fontSize: 12),
-                      ),
-                    ],
-                  )
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 25),
-
-            // ---------- MUSIC CONTROLS ----------
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: const [
-                  Icon(Icons.shuffle, color: Colors.white70, size: 28),
-                  Icon(Icons.skip_previous_rounded,
-                      color: Colors.white, size: 42),
-                  Icon(Icons.play_circle_fill_rounded,
-                      color: Colors.white, size: 85),
-                  Icon(Icons.skip_next_rounded,
-                      color: Colors.white, size: 42),
-                  Icon(Icons.repeat, color: Colors.green, size: 28),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 35),
-
-            // ---------- DEVICE & SHARE ----------
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Row(
-                children: const [
-                  Icon(Icons.bluetooth_audio, color: Colors.green),
-                  SizedBox(width: 8),
-                  Text("BEATSPILL+",
-                      style: TextStyle(color: Colors.green)),
-                  Spacer(),
-                  Icon(Icons.share, color: Colors.white),
-                  SizedBox(width: 20),
-                  Icon(Icons.format_list_bulleted, color: Colors.white),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ---------- LYRICS BUTTON ----------
+            // 🎶 MINI PLAYER + LIBRARY ICON
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 18),
-              height: 55,
-              decoration: BoxDecoration(
-                color: const Color(0xFFB85C2F),
-                borderRadius: BorderRadius.circular(10),
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              color: const Color(0xff1F1F1F),
               child: Row(
-                children: const [
-                  SizedBox(width: 15),
-                  Text(
-                    "Lyrics",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
+                children: [
+                  // Thumbnail
+                  Container(
+                    height: 48,
+                    width: 48,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(6),
+                      image: const DecorationImage(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(
+                          "https://i.scdn.co/image/ab67616d0000b27306ad03c41e6de0569681b89f",
+                        ),
+                      ),
                     ),
                   ),
-                  Spacer(),
-                  Text(
-                    "MORE",
-                    style: TextStyle(color: Colors.white70),
+
+                  const SizedBox(width: 12),
+
+                  // Song
+                  const Expanded(
+                    child: Text(
+                      "From Me To You – Remastered",
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 15,
+                      ),
+                    ),
                   ),
-                  SizedBox(width: 10),
-                  Icon(Icons.keyboard_arrow_up, color: Colors.white70),
-                  SizedBox(width: 12),
+
+                  const SizedBox(width: 12),
+
+                  // ▶️ PAUSE BUTTON
+                  const Icon(Icons.pause, color: Colors.white, size: 30),
+
+                  const SizedBox(width: 16),
+
+                  // 📚 LIBRARY ICON (ADDED)
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, "/library");
+                    },
+                    child: const Icon(
+                      Icons.library_music,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
                 ],
               ),
             ),
-
-            const SizedBox(height: 20),
           ],
         ),
       ),
