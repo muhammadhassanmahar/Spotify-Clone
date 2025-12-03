@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});   // ← FIXED (added key)
+  const SearchScreen({super.key});
 
   final List<Map<String, String>> recentSearches = const [
     {
@@ -22,7 +22,8 @@ class SearchScreen extends StatelessWidget {
     {
       'name': '1 (Remastered)',
       'type': 'Album • The Beatles',
-      'image': 'https://i.imgur.com/aR3zJ4U.png'
+      'image': 'https://i.imgur.com/aR3zJ4U.png',
+      'navigate': 'album'
     },
     {
       'name': 'HAYES',
@@ -53,11 +54,13 @@ class SearchScreen extends StatelessWidget {
             children: [
               const SizedBox(height: 10),
 
-              // Search bar
+              // 🔍 Search bar
               Row(
                 children: [
                   Expanded(
                     child: Container(
+                      height: 45,
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
                         color: Colors.grey[900],
                         borderRadius: BorderRadius.circular(12),
@@ -73,73 +76,82 @@ class SearchScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
-                  const SizedBox(width: 10),
-
+                  const SizedBox(width: 12),
                   const Text(
                     'Cancel',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
                   )
                 ],
               ),
 
-              const SizedBox(height: 25),
+              const SizedBox(height: 28),
 
               const Text(
                 'Recent searches',
                 style: TextStyle(
                   color: Colors.white,
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
 
-              const SizedBox(height: 15),
+              const SizedBox(height: 18),
 
-              // Recent list
+              // LIST
               Expanded(
                 child: ListView.builder(
+                  physics: const BouncingScrollPhysics(),
                   itemCount: recentSearches.length,
                   itemBuilder: (context, index) {
                     final item = recentSearches[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 18),
-                      child: Row(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Image.network(
-                              item['image']!,
-                              width: 55,
-                              height: 55,
-                              fit: BoxFit.cover,
+
+                    return GestureDetector(
+                      onTap: () {
+                        if (item['navigate'] == 'album') {
+                          Navigator.pushNamed(context, "/album");
+                        }
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Row(
+                          children: [
+                            // IMAGE
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Image.network(
+                                item['image']!,
+                                width: 55,
+                                height: 55,
+                                fit: BoxFit.cover,
+                              ),
                             ),
-                          ),
 
-                          const SizedBox(width: 12),
+                            const SizedBox(width: 14),
 
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item['name']!,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w500,
+                            // TEXTS
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item['name']!,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 3),
-                              Text(
-                                item['type']!,
-                                style: const TextStyle(
-                                  color: Colors.white54,
-                                  fontSize: 14,
+                                const SizedBox(height: 4),
+                                Text(
+                                  item['type']!,
+                                  style: const TextStyle(
+                                    color: Colors.white54,
+                                    fontSize: 14,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
