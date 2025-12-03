@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/album_view_screen.dart';
+import 'package:spotify/track_view_screen.dart';   
 
 import 'screens/splash_screen.dart';
 import 'screens/start_screen.dart';
@@ -37,10 +38,9 @@ class MyApp extends StatelessWidget {
         "/artists": (context) => const ArtistsScreen(),
         "/home": (context) => const HomeScreen(),
         "/search": (context) => const SearchScreen(),
-
-        // FIXED ROUTES (snake_case)
         "/album_view": (context) => const AlbumViewScreen(),
         "/album_control": (context) => const AlbumControlScreen(),
+        "/track_view": (context) => const TrackViewScreen(),
       },
     );
   }
