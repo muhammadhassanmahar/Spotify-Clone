@@ -50,7 +50,7 @@ class AlbumViewScreen extends StatelessWidget {
                     // 🎤 TITLE
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, "/album_Control");
+                        Navigator.pushNamed(context, "/album_control");
                       },
                       child: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16),
@@ -151,7 +151,7 @@ class AlbumViewScreen extends StatelessWidget {
                           onTap: () {
                             // 👉 SECOND SONG OPENS TRACK VIEW SCREEN
                             if (isSecond) {
-                              Navigator.pushNamed(context, "/track_View");
+                              Navigator.pushNamed(context, "/track_view");
                             }
                           },
                           child: ListTile(
