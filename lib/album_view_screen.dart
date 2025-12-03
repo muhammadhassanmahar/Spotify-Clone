@@ -5,6 +5,8 @@ class AlbumViewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: const Color(0xff121212),
       body: SafeArea(
@@ -26,13 +28,13 @@ class AlbumViewScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // 🎵 ALBUM COVER
+                    // 🎵 ALBUM COVER (RESPONSIVE)
                     Center(
                       child: Container(
-                        width: 260,
-                        height: 260,
+                        width: width * 0.65,
+                        height: width * 0.65,
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(12),
                           image: const DecorationImage(
                             fit: BoxFit.cover,
                             image: NetworkImage(
@@ -45,10 +47,10 @@ class AlbumViewScreen extends StatelessWidget {
 
                     const SizedBox(height: 20),
 
-                    // 🎤 TITLE (TAP → ALBUM CONTROL)
+                    // 🎤 TITLE
                     GestureDetector(
                       onTap: () {
-                        Navigator.pushNamed(context, "/album_control");
+                        Navigator.pushNamed(context, "/albumControl");
                       },
                       child: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 16),
@@ -56,15 +58,14 @@ class AlbumViewScreen extends StatelessWidget {
                           "1 (Remastered)",
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 28,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -0.3,
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
 
-                    const SizedBox(height: 7),
+                    const SizedBox(height: 8),
 
                     // 🧑‍🎤 ARTIST ROW
                     Padding(
@@ -72,7 +73,7 @@ class AlbumViewScreen extends StatelessWidget {
                       child: Row(
                         children: const [
                           CircleAvatar(
-                            radius: 13,
+                            radius: 14,
                             backgroundImage: NetworkImage(
                               "https://i.scdn.co/image/ab6761610000e5eb35ddc4c4c596cbcac7e0e5aa",
                             ),
@@ -82,8 +83,7 @@ class AlbumViewScreen extends StatelessWidget {
                             "The Beatles",
                             style: TextStyle(
                               color: Colors.white70,
-                              fontSize: 15,
-                              fontWeight: FontWeight.w500,
+                              fontSize: 16,
                             ),
                           ),
                         ],
@@ -92,7 +92,6 @@ class AlbumViewScreen extends StatelessWidget {
 
                     const SizedBox(height: 6),
 
-                    // 📝 ALBUM INFO
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
@@ -106,38 +105,39 @@ class AlbumViewScreen extends StatelessWidget {
 
                     const SizedBox(height: 20),
 
-                    // ❤️ ⬇️ ... | PLAY BUTTON
+                    // ❤️ ⬇️ ... + PLAY BUTTON
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Row(
                         children: [
-                          Icon(Icons.favorite_border,
+                          const Icon(Icons.favorite_border,
+                              color: Colors.white, size: 28),
+                          const SizedBox(width: 18),
+
+                          const Icon(Icons.download_for_offline_outlined,
                               color: Colors.white, size: 27),
                           const SizedBox(width: 18),
 
-                          Icon(Icons.download_for_offline_outlined,
-                              color: Colors.white, size: 26),
-                          const SizedBox(width: 18),
-
-                          Icon(Icons.more_vert, color: Colors.white, size: 26),
+                          const Icon(Icons.more_vert,
+                              color: Colors.white, size: 28),
                           const Spacer(),
 
-                          // 🟢 GREEN PLAY BUTTON
+                          // 🟢 PLAY BUTTON
                           Container(
-                            height: 58,
-                            width: 58,
+                            height: 60,
+                            width: 60,
                             decoration: const BoxDecoration(
                               color: Color(0xff1DB954),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.play_arrow,
-                                size: 38, color: Colors.black),
+                                size: 40, color: Colors.black),
                           )
                         ],
                       ),
                     ),
 
-                    const SizedBox(height: 25),
+                    const SizedBox(height: 30),
 
                     // 🎼 TRACK LIST
                     ListView.builder(
@@ -145,31 +145,46 @@ class AlbumViewScreen extends StatelessWidget {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: 8,
                       itemBuilder: (context, index) {
-                        return ListTile(
-                          contentPadding:
-                              const EdgeInsets.symmetric(horizontal: 16),
-                          leading: index == 1
-                              ? const Icon(Icons.graphic_eq,
-                                  color: Color(0xff1DB954), size: 22)
-                              : const SizedBox(width: 22),
+                        final bool isSecond = index == 1;
 
-                          title: Text(
-                            "Song ${index + 1} (Remastered)",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
+                        return InkWell(
+                          onTap: () {
+                            // 👉 SECOND SONG OPENS TRACK VIEW SCREEN
+                            if (isSecond) {
+                              Navigator.pushNamed(context, "/trackView");
+                            }
+                          },
+                          child: ListTile(
+                            contentPadding:
+                                const EdgeInsets.symmetric(horizontal: 16),
+
+                            leading: isSecond
+                                ? const Icon(Icons.graphic_eq,
+                                    size: 22, color: Color(0xff1DB954))
+                                : const SizedBox(width: 22),
+
+                            title: Text(
+                              index == 1
+                                  ? "From Me To You – Remastered"
+                                  : "Song ${index + 1} (Remastered)",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
 
-                          subtitle: const Text(
-                            "The Beatles",
-                            style:
-                                TextStyle(color: Colors.white54, fontSize: 13),
-                          ),
+                            subtitle: const Text(
+                              "The Beatles",
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 13,
+                              ),
+                            ),
 
-                          trailing:
-                              const Icon(Icons.more_vert, color: Colors.white),
+                            trailing: const Icon(Icons.more_vert,
+                                color: Colors.white),
+                          ),
                         );
                       },
                     ),
@@ -180,13 +195,13 @@ class AlbumViewScreen extends StatelessWidget {
               ),
             ),
 
-            // 🎶 BOTTOM MINI-PLAYER
+            // 🎶 MINI PLAYER
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
               color: const Color(0xff1F1F1F),
               child: Row(
                 children: [
-                  // Small Album Art
+                  // Thumbnail
                   Container(
                     height: 48,
                     width: 48,
@@ -203,19 +218,19 @@ class AlbumViewScreen extends StatelessWidget {
 
                   const SizedBox(width: 12),
 
-                  // Song Info
+                  // Song
                   const Expanded(
                     child: Text(
                       "From Me To You – Remastered",
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 15,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
 
-                  const SizedBox(width: 10),
+                  const SizedBox(width: 12),
 
                   const Icon(Icons.pause, color: Colors.white, size: 30),
                 ],
