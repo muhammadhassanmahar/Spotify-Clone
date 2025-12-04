@@ -5,10 +5,18 @@ class TrackScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ---------------- GET ARGUMENTS ----------------
+    final args = ModalRoute.of(context)!.settings.arguments as Map<String, String>?;
+
+    // Default values agar arguments nahi mile
+    final String title = args?['title'] ?? "Unknown Song";
+    final String artist = args?['artist'] ?? "Unknown Artist";
+    final String image = args?['image'] ??
+        "https://i.scdn.co/image/ab67616d00001e0208dd3f0bcb7b4f31f27e5f1e";
+
     final mq = MediaQuery.of(context);
     final w = mq.size.width;
     final isWide = w >= 600;
-
     double coverSize = isWide ? w * 0.30 : w * 0.55;
 
     return Scaffold(
@@ -26,7 +34,7 @@ class TrackScreen extends StatelessWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.center,
                   colors: [
-                    const Color(0xFF7A2E2E).withValues(alpha: .95),
+                    const Color(0xFF7A2E2E).withValues(alpha: 0.95),
                     Colors.transparent,
                   ],
                 ),
@@ -37,7 +45,7 @@ class TrackScreen extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
                     child: Image.network(
-                      "https://i.scdn.co/image/ab67616d00001e0208dd3f0bcb7b4f31f27e5f1e",
+                      image,
                       width: coverSize,
                       height: coverSize,
                       fit: BoxFit.cover,
@@ -47,9 +55,9 @@ class TrackScreen extends StatelessWidget {
                   const SizedBox(height: 20),
 
                   /// Title
-                  const Text(
-                    "1 (Remastered)",
-                    style: TextStyle(
+                  Text(
+                    title,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
@@ -61,7 +69,7 @@ class TrackScreen extends StatelessWidget {
 
                   /// Artist
                   Text(
-                    "The Beatles",
+                    artist,
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.70),
                       fontSize: 16,
@@ -84,9 +92,17 @@ class TrackScreen extends StatelessWidget {
                     option(Icons.playlist_add, "Add to playlist"),
                     option(Icons.queue_music, "Add to queue"),
 
-                    // ---- Updated Share option ----
+                    // ---- Share option with arguments ----
                     InkWell(
-                      onTap: () => Navigator.pushNamed(context, "/share_song"),
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        "/song_share",
+                        arguments: {
+                          "title": title,
+                          "artist": artist,
+                          "image": image,
+                        },
+                      ),
                       child: option(Icons.share, "Share"),
                     ),
 

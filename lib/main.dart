@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:spotify/album_view_screen.dart';
-import 'package:spotify/track_view_screen.dart';   
-
+import 'package:spotify/track_view_screen.dart';
+import 'package:spotify/track_screen.dart';
+import 'package:spotify/song_share_screen.dart';
+import 'package:spotify/library_screen.dart';
+import 'package:spotify/user_library_screen.dart';
+import 'package:spotify/settings_screen.dart';
 import 'screens/splash_screen.dart';
 import 'screens/start_screen.dart';
 import 'screens/home_screen.dart';
@@ -38,9 +42,17 @@ class MyApp extends StatelessWidget {
         "/artists": (context) => const ArtistsScreen(),
         "/home": (context) => const HomeScreen(),
         "/search": (context) => const SearchScreen(),
+
         "/album_view": (context) => const AlbumViewScreen(),
         "/album_control": (context) => const AlbumControlScreen(),
         "/track_view": (context) => const TrackViewScreen(),
+
+        // 🚀 Clean routes without hardcoded parameters
+        "/track_screen": (context) => const TrackScreen(),
+        "/song_share": (context) => const SongShareScreen(),
+        "/library": (context) => const LibraryScreen(),
+        "/user_library": (context) => const UserLibraryScreen(),
+        "/settings": (context) => const SettingsScreen(),
       },
     );
   }

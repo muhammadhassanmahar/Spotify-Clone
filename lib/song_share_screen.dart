@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 
 class SongShareScreen extends StatelessWidget {
-  final String title;
-  final String artist;
-  final String image;
-
-  const SongShareScreen({
-    super.key,
-    required this.title,
-    required this.artist,
-    required this.image,
-  });
+  const SongShareScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // ---------------- GET ARGUMENTS ----------------
+    final args = ModalRoute.of(context)!.settings.arguments as Map<String, String>?;
+
+    // Default values agar arguments nahi mile
+    final String title = args?['title'] ?? "Unknown Song";
+    final String artist = args?['artist'] ?? "Unknown Artist";
+    final String image = args?['image'] ??
+        "https://i.scdn.co/image/ab67616d00001e0208dd3f0bcb7b4f31f27e5f1e";
+
     final height = MediaQuery.of(context).size.height;
 
     return Scaffold(
@@ -52,7 +52,7 @@ class SongShareScreen extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               image: DecorationImage(
-                image: AssetImage(image),
+                image: NetworkImage(image), // AssetImage -> NetworkImage
                 fit: BoxFit.cover,
               ),
             ),
