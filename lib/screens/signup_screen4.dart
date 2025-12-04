@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'artists_screen.dart';   // <<--- ADD THIS IMPORT
+import 'artists_screen.dart';
 
 class SignupScreen4 extends StatefulWidget {
   const SignupScreen4({super.key});
@@ -13,10 +13,10 @@ class _SignupScreen4State extends State<SignupScreen4> {
   bool newsOffers = false;
   bool marketingData = false;
 
+  bool get isButtonActive => fullName.trim().isNotEmpty && newsOffers && marketingData;
+
   @override
   Widget build(BuildContext context) {
-    bool isButtonActive = fullName.trim().isNotEmpty;
-
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
@@ -32,21 +32,19 @@ class _SignupScreen4State extends State<SignupScreen4> {
         ),
         centerTitle: true,
       ),
-
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: ListView(
           children: [
-            const SizedBox(height: 15),
-
+            const SizedBox(height: 20),
             const Text(
               "What's your name?",
-              style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 12),
 
-            // TEXTFIELD
+            // NAME TEXTFIELD
             Container(
               decoration: BoxDecoration(
                 color: Colors.grey.shade900,
@@ -55,17 +53,16 @@ class _SignupScreen4State extends State<SignupScreen4> {
               child: TextField(
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: " ",
+                  hintText: "Enter your name",
                   hintStyle: const TextStyle(color: Colors.white54),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
                   suffixIcon: fullName.isNotEmpty
-                      ? const Icon(Icons.check, color: Colors.white)
+                      ? const Icon(Icons.check_circle, color: Colors.greenAccent)
                       : null,
                 ),
-                onChanged: (value) {
-                  setState(() => fullName = value);
-                },
+                onChanged: (value) => setState(() => fullName = value),
               ),
             ),
 
@@ -77,70 +74,87 @@ class _SignupScreen4State extends State<SignupScreen4> {
 
             const SizedBox(height: 20),
             Divider(color: Colors.grey.shade800),
+            const SizedBox(height: 12),
 
-            const SizedBox(height: 10),
+            // TERMS INFO
             const Text(
               'By tapping on “Create account”, you agree to the Spotify Terms of Use.',
               style: TextStyle(color: Colors.white70, fontSize: 13),
             ),
-
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
             const Text("Terms of Use", style: TextStyle(color: Colors.greenAccent)),
-
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             const Text(
               "To learn more about how Spotify collects, uses, shares and protects your personal data, please see the Spotify Privacy Policy.",
               style: TextStyle(color: Colors.white70, fontSize: 13),
             ),
-
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
             const Text("Privacy Policy", style: TextStyle(color: Colors.greenAccent)),
 
             const SizedBox(height: 25),
 
-            // Checkbox 1
+            // CHECKBOX 1 - Circular
             Row(
               children: [
+                GestureDetector(
+                  onTap: () => setState(() => newsOffers = !newsOffers),
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white54),
+                      color: newsOffers ? Colors.green : Colors.transparent,
+                    ),
+                    child: newsOffers
+                        ? const Icon(Icons.check, size: 16, color: Colors.white)
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     "Please send me news and offers from Spotify.",
                     style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ),
-                Checkbox(
-                  value: newsOffers,
-                  onChanged: (v) => setState(() => newsOffers = v!),
-                  side: const BorderSide(color: Colors.white54),
-                )
               ],
             ),
+            const SizedBox(height: 12),
 
-            const SizedBox(height: 10),
-
-            // Checkbox 2
+            // CHECKBOX 2 - Circular
             Row(
               children: [
+                GestureDetector(
+                  onTap: () => setState(() => marketingData = !marketingData),
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white54),
+                      color: marketingData ? Colors.green : Colors.transparent,
+                    ),
+                    child: marketingData
+                        ? const Icon(Icons.check, size: 16, color: Colors.white)
+                        : null,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
                     "Share my registration data with Spotify’s content providers for marketing purposes.",
                     style: const TextStyle(color: Colors.white70, fontSize: 13),
                   ),
                 ),
-                Checkbox(
-                  value: marketingData,
-                  onChanged: (v) => setState(() => marketingData = v!),
-                  side: const BorderSide(color: Colors.white54),
-                )
               ],
             ),
-
-            const SizedBox(height: 50),
+            const SizedBox(height: 40),
 
             // CREATE ACCOUNT BUTTON
             GestureDetector(
               onTap: isButtonActive
                   ? () {
-                      // ★ NAVIGATE TO ARTISTS SCREEN ★
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -151,10 +165,10 @@ class _SignupScreen4State extends State<SignupScreen4> {
                   : null,
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 15),
+                padding: const EdgeInsets.symmetric(vertical: 16),
                 decoration: BoxDecoration(
-                  color: isButtonActive ? Colors.white : Colors.white24,
-                  borderRadius: BorderRadius.circular(25),
+                  color: isButtonActive ? Colors.greenAccent : Colors.white24,
+                  borderRadius: BorderRadius.circular(30),
                 ),
                 child: Center(
                   child: Text(
