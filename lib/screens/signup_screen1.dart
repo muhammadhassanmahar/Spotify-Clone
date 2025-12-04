@@ -11,6 +11,12 @@ class Signup1Screen extends StatefulWidget {
 class _Signup1ScreenState extends State<Signup1Screen> {
   final TextEditingController emailController = TextEditingController();
 
+  bool isValidEmail(String email) {
+    // Simple Gmail validation
+    final gmailRegex = RegExp(r"^[a-zA-Z0-9._%+-]+@gmail\.com$");
+    return gmailRegex.hasMatch(email);
+  }
+
   @override
   void initState() {
     super.initState();
@@ -21,6 +27,8 @@ class _Signup1ScreenState extends State<Signup1Screen> {
 
   @override
   Widget build(BuildContext context) {
+    final isButtonEnabled = isValidEmail(emailController.text);
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: LayoutBuilder(
@@ -95,7 +103,7 @@ class _Signup1ScreenState extends State<Signup1Screen> {
 
                   Center(
                     child: ElevatedButton(
-                      onPressed: emailController.text.isNotEmpty
+                      onPressed: isButtonEnabled
                           ? () {
                               Navigator.push(
                                 context,
@@ -106,7 +114,7 @@ class _Signup1ScreenState extends State<Signup1Screen> {
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: emailController.text.isNotEmpty
+                        backgroundColor: isButtonEnabled
                             ? Colors.green
                             : Colors.grey.shade700,
                         padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
