@@ -12,6 +12,8 @@ class _Signup2ScreenState extends State<Signup2Screen> {
   final TextEditingController passwordController = TextEditingController();
   bool obscure = true;
 
+  bool get isButtonEnabled => passwordController.text.length >= 6;
+
   @override
   void initState() {
     super.initState();
@@ -54,7 +56,7 @@ class _Signup2ScreenState extends State<Signup2Screen> {
                       "Create account",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -100,16 +102,19 @@ class _Signup2ScreenState extends State<Signup2Screen> {
 
                   const SizedBox(height: 6),
 
-                  const Text(
-                    "Use at least 8 characters.",
-                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                  Text(
+                    "Use at least 6 characters.",
+                    style: TextStyle(
+                      color: passwordController.text.length < 6 ? Colors.red.shade400 : Colors.white54,
+                      fontSize: 12,
+                    ),
                   ),
 
                   const SizedBox(height: 40),
 
                   Center(
                     child: ElevatedButton(
-                      onPressed: passwordController.text.isNotEmpty
+                      onPressed: isButtonEnabled
                           ? () {
                               Navigator.push(
                                 context,
@@ -120,11 +125,9 @@ class _Signup2ScreenState extends State<Signup2Screen> {
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: passwordController.text.isNotEmpty
-                            ? Colors.green
-                            : Colors.grey.shade700,
+                        backgroundColor: isButtonEnabled ? Colors.green : Colors.grey.shade700,
                         disabledBackgroundColor: Colors.grey.shade700,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
