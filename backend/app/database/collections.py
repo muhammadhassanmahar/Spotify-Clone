@@ -1,5 +1,8 @@
 from .connection import db
 
+# ------------------------------
+# Collection Name Constants
+# ------------------------------
 USERS_COLLECTION = "users"
 ARTISTS_COLLECTION = "artists"
 ALBUMS_COLLECTION = "albums"
@@ -10,7 +13,9 @@ HISTORY_COLLECTION = "history"
 LIKED_SONGS_COLLECTION = "liked_songs"
 RECENT_COLLECTION = "recent"
 
-# MongoDB collection objects
+# ------------------------------
+# Actual MongoDB Collection Objects
+# ------------------------------
 users_collection = db[USERS_COLLECTION]
 artists_collection = db[ARTISTS_COLLECTION]
 albums_collection = db[ALBUMS_COLLECTION]
