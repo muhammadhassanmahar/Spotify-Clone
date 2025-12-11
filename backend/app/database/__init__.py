@@ -7,5 +7,6 @@ from .collection import (
     genres_collection,
     history_collection,
     liked_songs_collection,
-    recent_collection
+    recent_collection,
+    likes_collection   # ← IMPORTANT
 )
