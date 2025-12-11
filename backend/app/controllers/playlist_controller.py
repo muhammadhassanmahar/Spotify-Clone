@@ -86,7 +86,7 @@ async def remove_song_from_playlist(playlist_id: str, song_id: str):
 
 
 # ----------------------------------------
-# UPDATE PLAYLIST (FIXED & ADDED)
+# UPDATE PLAYLIST
 # ----------------------------------------
 async def update_playlist(playlist_id: str, data: PlaylistUpdateSchema):
     update_data = {k: v for k, v in data.dict().items() if v is not None}
@@ -104,3 +104,15 @@ async def update_playlist(playlist_id: str, data: PlaylistUpdateSchema):
     del updated_playlist["_id"]
 
     return updated_playlist
+
+
+# ----------------------------------------
+# DELETE PLAYLIST  ← (NEWLY ADDED)
+# ----------------------------------------
+async def delete_playlist(playlist_id: str):
+    result = await playlists_collection.delete_one({"_id": ObjectId(playlist_id)})
+
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+
+    return {"message": "Playlist deleted successfully"}
