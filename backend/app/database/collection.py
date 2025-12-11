@@ -12,6 +12,7 @@ GENRES_COLLECTION = "genres"
 HISTORY_COLLECTION = "history"
 LIKED_SONGS_COLLECTION = "liked_songs"
 RECENT_COLLECTION = "recent"
+LIKES_COLLECTION = "likes"   # ✅ NEW
 
 # ------------------------------
 # Actual MongoDB Collection Objects
@@ -25,3 +26,4 @@ genres_collection = db[GENRES_COLLECTION]
 history_collection = db[HISTORY_COLLECTION]
 liked_songs_collection = db[LIKED_SONGS_COLLECTION]
 recent_collection = db[RECENT_COLLECTION]
+likes_collection = db[LIKES_COLLECTION]   # ✅ NEW

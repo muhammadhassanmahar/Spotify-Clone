@@ -1,5 +1,5 @@
 from app.database.connection import db
-from app.database.collections import GENRES_COLLECTION
+from backend.app.database.collection import GENRES_COLLECTION
 
 # Default genres for Spotify-like experience
 DEFAULT_GENRES = [

@@ -1,7 +1,7 @@
 from datetime import datetime
 from bson import ObjectId
 from app.database.connection import db
-from app.database.collections import LIKED_SONGS_COLLECTION
+from backend.app.database.collection import LIKED_SONGS_COLLECTION
 
 
 class LikedSongsModel:

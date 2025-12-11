@@ -1,7 +1,7 @@
 from datetime import datetime
 from bson import ObjectId
 from app.database.connection import db
-from app.database.collections import ARTISTS_COLLECTION
+from backend.app.database.collection import ARTISTS_COLLECTION
 
 
 class ArtistModel:
