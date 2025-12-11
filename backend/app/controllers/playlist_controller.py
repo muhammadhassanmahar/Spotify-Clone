@@ -11,6 +11,7 @@ from app.schemas.playlist_schema import PlaylistCreateSchema, PlaylistUpdateSche
 async def create_playlist(data: PlaylistCreateSchema, user_id: str):
     playlist_dict = data.dict()
     playlist_dict["user_id"] = user_id
+    playlist_dict.setdefault("songs", [])
 
     result = await playlists_collection.insert_one(playlist_dict)
 
@@ -81,4 +82,25 @@ async def remove_song_from_playlist(playlist_id: str, song_id: str):
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="Playlist or song not found")
 
-    r
+    return {"message": "Song removed from playlist"}
+
+
+# ----------------------------------------
+# UPDATE PLAYLIST (FIXED & ADDED)
+# ----------------------------------------
+async def update_playlist(playlist_id: str, data: PlaylistUpdateSchema):
+    update_data = {k: v for k, v in data.dict().items() if v is not None}
+
+    result = await playlists_collection.update_one(
+        {"_id": ObjectId(playlist_id)},
+        {"$set": update_data}
+    )
+
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="Playlist not found or no changes made")
+
+    updated_playlist = await playlists_collection.find_one({"_id": ObjectId(playlist_id)})
+    updated_playlist["id"] = str(updated_playlist["_id"])
+    del updated_playlist["_id"]
+
+    return updated_playlist
