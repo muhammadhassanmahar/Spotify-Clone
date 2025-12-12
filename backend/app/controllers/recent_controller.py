@@ -1,49 +1,45 @@
-from sqlalchemy.future import select
-from app.database import async_session
-from app.models.recent_model import RecentSong
+from datetime import datetime
+from bson import ObjectId
+from app.database import db
 
 
 # --------------------------------------------------
 # ADD SONG TO RECENT LIST (when user plays a song)
 # --------------------------------------------------
 async def add_recent_song(user_id: int, song_id: int):
-    async with async_session() as session:
-        new_row = RecentSong(
-            user_id=user_id,
-            song_id=song_id
-        )
 
-        session.add(new_row)
-        await session.commit()
-        await session.refresh(new_row)
+    new_data = {
+        "user_id": user_id,
+        "song_id": song_id,
+        "played_at": datetime.utcnow()
+    }
 
-        return {
-            "id": new_row.id,
-            "user_id": new_row.user_id,
-            "song_id": new_row.song_id,
-            "played_at": new_row.played_at
-        }
+    result = await db.recent_songs.insert_one(new_data)
+
+    return {
+        "id": str(result.inserted_id),
+        "user_id": user_id,
+        "song_id": song_id,
+        "played_at": new_data["played_at"]
+    }
 
 
 # --------------------------------------------------
 # GET USER'S RECENT SONG LIST
 # --------------------------------------------------
 async def get_recent_songs(user_id: int):
-    async with async_session() as session:
-        query = await session.execute(
-            select(RecentSong)
-            .where(RecentSong.user_id == user_id)
-            .order_by(RecentSong.played_at.desc())
-        )
+    cursor = db.recent_songs.find(
+        {"user_id": user_id}
+    ).sort("played_at", -1)
 
-        rows = query.scalars().all()
+    recent_list = []
 
-        return [
-            {
-                "id": r.id,
-                "user_id": r.user_id,
-                "song_id": r.song_id,
-                "played_at": r.played_at
-            }
-            for r in rows
-        ]
+    async for doc in cursor:
+        recent_list.append({
+            "id": str(doc["_id"]),
+            "user_id": doc["user_id"],
+            "song_id": doc["song_id"],
+            "played_at": doc["played_at"]
+        })
+
+    return recent_list
