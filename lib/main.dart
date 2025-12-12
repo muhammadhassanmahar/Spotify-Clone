@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:spotify/album_view_screen.dart';
-import 'package:spotify/track_view_screen.dart';
-import 'package:spotify/track_screen.dart';
-import 'package:spotify/song_share_screen.dart';
-import 'package:spotify/library_screen.dart';
-import 'package:spotify/user_library_screen.dart';
-import 'package:spotify/settings_screen.dart';
+
+// ---------- Corrected Imports ----------
+import 'screens/album_view_screen.dart';
+import 'screens/track_view_screen.dart';
+import 'screens/track_screen.dart';
+import 'screens/song_share_screen.dart';
+import 'screens/library_screen.dart';
+import 'screens/user_library_screen.dart';
+import 'screens/settings_screen.dart';
+
 import 'screens/splash_screen.dart';
 import 'screens/start_screen.dart';
 import 'screens/home_screen.dart';
@@ -30,25 +33,26 @@ class MyApp extends StatelessWidget {
       title: 'Spotify Clone',
       theme: ThemeData.dark(),
 
-      // Default route
       initialRoute: "/",
 
       routes: {
         "/": (context) => const SplashScreen(),
         "/start": (context) => const StartScreen(),
+
         "/signup1": (context) => const Signup1Screen(),
         "/signup2": (context) => const Signup2Screen(),
         "/signup3": (context) => const Signup3Screen(),
+
         "/artists": (context) => const ArtistsScreen(),
         "/home": (context) => const HomeScreen(),
         "/search": (context) => const SearchScreen(),
 
         "/album_view": (context) => const AlbumViewScreen(),
         "/album_control": (context) => const AlbumControlScreen(),
-        "/track_view": (context) => const TrackViewScreen(),
 
-        // 🚀 Clean routes without hardcoded parameters
+        "/track_view": (context) => const TrackViewScreen(),
         "/track_screen": (context) => const TrackScreen(),
+
         "/song_share": (context) => const SongShareScreen(),
         "/library": (context) => const LibraryScreen(),
         "/user_library": (context) => const UserLibraryScreen(),
