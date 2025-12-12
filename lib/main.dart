@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// ---------- Corrected Imports ----------
 import 'screens/album_view_screen.dart';
 import 'screens/track_view_screen.dart';
 import 'screens/track_screen.dart';
@@ -8,7 +7,6 @@ import 'screens/song_share_screen.dart';
 import 'screens/library_screen.dart';
 import 'screens/user_library_screen.dart';
 import 'screens/settings_screen.dart';
-
 import 'screens/splash_screen.dart';
 import 'screens/start_screen.dart';
 import 'screens/home_screen.dart';
