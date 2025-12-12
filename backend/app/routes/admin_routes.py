@@ -13,7 +13,7 @@ router = APIRouter(prefix="/admin", tags=["Admin"])
 # CHECK ADMIN ACCESS
 # ----------------------------------------
 def admin_only(user):
-    if user["role"] != "admin":
+    if user.get("role") != "admin":
         return {"error": "Access denied. Admin only."}
     return None
 
