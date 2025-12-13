@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles   # ✅ ADD THIS
 
 # Routes
 from app.routes.auth_routes import router as auth_router
@@ -30,6 +31,16 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+
+# -------------------------------------------------
+# STATIC FILES (SONGS / IMAGES)
+# -------------------------------------------------
+app.mount(
+    "/uploads",
+    StaticFiles(directory="uploads"),
+    name="uploads"
 )
 
 
