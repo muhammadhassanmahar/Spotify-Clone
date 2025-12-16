@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../services/api_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,6 +23,14 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       return "Good Evening";
     }
+  }
+
+  late Future<List<dynamic>> songsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    songsFuture = ApiService.getAllSongs();
   }
 
   @override
@@ -47,46 +56,91 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const Text(
               "Recently Played",
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 10),
 
-            // Fake Horizontal Songs List
+            // 🔥 BACKEND SONGS (HORIZONTAL)
             SizedBox(
               height: 150,
-              child: ListView(
-                scrollDirection: Axis.horizontal,
-                children: List.generate(6, (i) {
-                  return Container(
-                    width: 120,
-                    margin: const EdgeInsets.only(right: 12),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.shade900,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          height: 100,
+              child: FutureBuilder<List<dynamic>>(
+                future: songsFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return const Center(
+                        child: CircularProgressIndicator());
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(
+                        child: Text("No songs found",
+                            style: TextStyle(color: Colors.white)));
+                  }
+
+                  final songs = snapshot.data!;
+
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: songs.length,
+                    itemBuilder: (context, index) {
+                      final song = songs[index];
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(
+                            context,
+                            "/track_view",
+                            arguments: song,
+                          );
+                        },
+                        child: Container(
+                          width: 120,
+                          margin: const EdgeInsets.only(right: 12),
                           decoration: BoxDecoration(
+                            color: Colors.grey.shade900,
                             borderRadius: BorderRadius.circular(8),
-                            image: const DecorationImage(
-                              image: NetworkImage(
-                                  "https://i.scdn.co/image/ab67706f00000003a577bbf6511ea15a69c8d47f"),
-                              fit: BoxFit.cover,
-                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              Container(
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  image: DecorationImage(
+                                    image: NetworkImage(
+                                      ApiService.imageUrl(
+                                        song['cover_image'] ??
+                                            "uploads/default.png",
+                                      ),
+                                    ),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 6),
+                                child: Text(
+                                  song['title'] ?? "Unknown",
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style:
+                                      const TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(height: 5),
-                        const Text(
-                          "Top Hits",
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   );
-                }),
+                },
               ),
             ),
 
@@ -94,43 +148,84 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const Text(
               "Recommended For You",
-              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold),
             ),
 
             const SizedBox(height: 10),
 
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: 6,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12),
-              itemBuilder: (context, index) {
-                return Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade900,
-                    borderRadius: BorderRadius.circular(8),
+            // 🔥 SAME BACKEND DATA (GRID)
+            FutureBuilder<List<dynamic>>(
+              future: songsFuture,
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) {
+                  return const SizedBox();
+                }
+
+                final songs = snapshot.data!;
+
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: songs.length,
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
                   ),
-                  child: Column(
-                    children: [
-                      Container(
-                        height: 110,
+                  itemBuilder: (context, index) {
+                    final song = songs[index];
+
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          "/track_view",
+                          arguments: song,
+                        );
+                      },
+                      child: Container(
                         decoration: BoxDecoration(
+                          color: Colors.grey.shade900,
                           borderRadius: BorderRadius.circular(8),
-                          image: const DecorationImage(
-                            image: NetworkImage(
-                                "https://i.scdn.co/image/ab67616d0000b27306ad03c41e6de0569681b89f"),
-                            fit: BoxFit.cover,
-                          ),
+                        ),
+                        child: Column(
+                          children: [
+                            Container(
+                              height: 110,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                image: DecorationImage(
+                                  image: NetworkImage(
+                                    ApiService.imageUrl(
+                                      song['cover_image'] ??
+                                          "uploads/default.png",
+                                    ),
+                                  ),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 6),
+                              child: Text(
+                                song['title'] ?? "Unknown",
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style:
+                                    const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        "Pop Mix",
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ],
-                  ),
+                    );
+                  },
                 );
               },
             ),
@@ -138,25 +233,24 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      // ⭐ FIXED BOTTOM NAVIGATION BAR ⭐
+      // ⭐ BOTTOM NAV BAR (UNCHANGED)
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.greenAccent,
         unselectedItemColor: Colors.white54,
         currentIndex: selectedIndex,
         onTap: (index) {
-          // Search Icon (index 1)
           if (index == 1) {
             Navigator.pushNamed(context, "/search");
-            return; // important: avoid updating selectedIndex
+            return;
           }
-
           setState(() => selectedIndex = index);
         },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
           BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
-          BottomNavigationBarItem(icon: Icon(Icons.library_music), label: "Library"),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.library_music), label: "Library"),
         ],
       ),
     );
