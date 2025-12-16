@@ -1,10 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
+import '../services/api_service.dart';
 
-class TrackViewScreen extends StatelessWidget {
+class TrackViewScreen extends StatefulWidget {
   const TrackViewScreen({super.key});
 
   @override
+  State<TrackViewScreen> createState() => _TrackViewScreenState();
+}
+
+class _TrackViewScreenState extends State<TrackViewScreen> {
+  final AudioPlayer _player = AudioPlayer();
+  bool isPlaying = false;
+
+  @override
+  void dispose() {
+    _player.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final song = ModalRoute.of(context)!.settings.arguments as Map;
+
+    final String title = song['title'] ?? "Unknown Song";
+    final String artist = song['artist_name'] ?? "Unknown Artist";
+    final String audioUrl = ApiService.audioUrl(song['audio_url']);
+    final String coverImage = ApiService.imageUrl(
+      song['cover_image'] ?? "uploads/default.png",
+    );
+
     return Scaffold(
       backgroundColor: const Color(0xFF6A1F1A),
       body: SafeArea(
@@ -15,24 +40,9 @@ class TrackViewScreen extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Icon(Icons.expand_more, color: Colors.white),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(context, '/track_screen');
-                    },
-                    child: const Row(
-                      children: [
-                        Text('1(Remastered)',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500)),
-                        SizedBox(width: 4),
-                        Icon(Icons.more_horiz, color: Colors.white)
-                      ],
-                    ),
-                  ),
+                children: const [
+                  BackButton(color: Colors.white),
+                  Icon(Icons.more_horiz, color: Colors.white)
                 ],
               ),
             ),
@@ -45,8 +55,8 @@ class TrackViewScreen extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
-                    image: const DecorationImage(
-                      image: AssetImage('assets/track_cover.png'),
+                    image: DecorationImage(
+                      image: NetworkImage(coverImage),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -55,9 +65,9 @@ class TrackViewScreen extends StatelessWidget {
             ),
 
             // Track Info
-            const Text(
-              'From Me to You - Mono / Remast',
-              style: TextStyle(
+            Text(
+              title,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -67,46 +77,88 @@ class TrackViewScreen extends StatelessWidget {
 
             const SizedBox(height: 4),
 
-            const Text(
-              'The Beatles',
-              style: TextStyle(color: Colors.white70, fontSize: 14),
+            Text(
+              artist,
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
             ),
 
             // Progress Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: Column(
-                children: [
-                  Slider(
-                    value: 38,
-                    max: 118,
-                    onChanged: (value) {},
-                    activeColor: Colors.white,
-                    inactiveColor: Colors.white24,
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: const [
-                      Text('0:38', style: TextStyle(color: Colors.white70)),
-                      Text('-1:18', style: TextStyle(color: Colors.white70))
+            StreamBuilder<Duration>(
+              stream: _player.positionStream,
+              builder: (context, snapshot) {
+                final position = snapshot.data ?? Duration.zero;
+                final duration = _player.duration ?? Duration.zero;
+
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                  child: Column(
+                    children: [
+                      Slider(
+                        value: position.inSeconds.toDouble(),
+                        max: duration.inSeconds.toDouble() + 1,
+                        onChanged: (value) {
+                          _player.seek(Duration(seconds: value.toInt()));
+                        },
+                        activeColor: Colors.white,
+                        inactiveColor: Colors.white24,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            _formatTime(position),
+                            style:
+                                const TextStyle(color: Colors.white70),
+                          ),
+                          Text(
+                            "-${_formatTime(duration - position)}",
+                            style:
+                                const TextStyle(color: Colors.white70),
+                          )
+                        ],
+                      )
                     ],
-                  )
-                ],
-              ),
+                  ),
+                );
+              },
             ),
 
             // Controls
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Icon(Icons.shuffle, color: Colors.white),
-                  Icon(Icons.skip_previous, color: Colors.white, size: 40),
-                  Icon(Icons.pause_circle_filled,
-                      color: Colors.white, size: 70),
-                  Icon(Icons.skip_next, color: Colors.white, size: 40),
-                  Icon(Icons.repeat, color: Colors.green),
+                children: [
+                  const Icon(Icons.shuffle, color: Colors.white),
+
+                  const Icon(Icons.skip_previous,
+                      color: Colors.white, size: 40),
+
+                  GestureDetector(
+                    onTap: () async {
+                      if (isPlaying) {
+                        await _player.pause();
+                      } else {
+                        await _player.setUrl(audioUrl);
+                        await _player.play();
+                      }
+                      setState(() => isPlaying = !isPlaying);
+                    },
+                    child: Icon(
+                      isPlaying
+                          ? Icons.pause_circle_filled
+                          : Icons.play_circle_filled,
+                      color: Colors.white,
+                      size: 70,
+                    ),
+                  ),
+
+                  const Icon(Icons.skip_next,
+                      color: Colors.white, size: 40),
+
+                  const Icon(Icons.repeat, color: Colors.green),
                 ],
               ),
             ),
@@ -121,11 +173,18 @@ class TrackViewScreen extends StatelessWidget {
               child: const Text(
                 'Lyrics',
                 style: TextStyle(color: Colors.white, fontSize: 18),
+                textAlign: TextAlign.center,
               ),
             )
           ],
         ),
       ),
     );
+  }
+
+  String _formatTime(Duration d) {
+    final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return "$minutes:$seconds";
   }
 }
