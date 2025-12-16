@@ -5,14 +5,20 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: "^3.9.2"
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-  intl: ^0.18.1   # <- Added intl package for date/time formatting
+  intl: ^0.18.1
+
+  # 🔊 Audio Player
+  just_audio: ^0.9.36
+
+  # 🌐 HTTP API Calls
+  http: ^1.2.2
 
 dev_dependencies:
   flutter_test:
