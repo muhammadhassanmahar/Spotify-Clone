@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class ApiService {
-  // ⚠️ Apna backend URL yahan set karo
+  // ------------------------------------
+  // BACKEND BASE URL
   // Android emulator: http://10.0.2.2:8000
-  // Real device / web: http://YOUR_IP:8000
+  // Real device: http://YOUR_IP:8000
+  // ------------------------------------
   static const String baseUrl = "http://10.0.2.2:8000";
 
   // ------------------------------------
@@ -38,10 +40,14 @@ class ApiService {
   }
 
   // ------------------------------------
-  // SEARCH SONGS
+  // 🔍 SEARCH SONGS (FIXED ✅)
   // ------------------------------------
   static Future<List<dynamic>> searchSongs(String query) async {
-    final url = Uri.parse("$baseUrl/search?q=$query");
+    if (query.trim().isEmpty) return [];
+
+    final encodedQuery = Uri.encodeQueryComponent(query);
+    final url =
+        Uri.parse("$baseUrl/search/songs?query=$encodedQuery");
 
     final response = await http.get(url);
 
@@ -53,10 +59,9 @@ class ApiService {
   }
 
   // ------------------------------------
-  // FULL AUDIO URL HELPER
+  // FULL AUDIO URL
   // ------------------------------------
   static String audioUrl(String path) {
-    // backend se jo audio_url aaye usko full URL bana dega
     return "$baseUrl/$path";
   }
 

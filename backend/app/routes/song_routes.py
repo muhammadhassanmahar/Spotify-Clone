@@ -13,11 +13,11 @@ router = APIRouter(prefix="/songs", tags=["Songs"])
 
 
 # ----------------------------------------
-# CREATE NEW SONG
+# GET ALL SONGS  ✅ MUST BE FIRST
 # ----------------------------------------
-@router.post("/")
-async def create_new_song(data: SongCreateSchema):
-    return await create_song(data)
+@router.get("/")
+async def fetch_all_songs():
+    return await get_all_songs()
 
 
 # ----------------------------------------
@@ -29,11 +29,11 @@ async def get_song(song_id: str):
 
 
 # ----------------------------------------
-# GET ALL SONGS
+# CREATE NEW SONG
 # ----------------------------------------
-@router.get("/")
-async def fetch_all_songs():
-    return await get_all_songs()
+@router.post("/")
+async def create_new_song(data: SongCreateSchema):
+    return await create_song(data)
 
 
 # ----------------------------------------
