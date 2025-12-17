@@ -5,14 +5,15 @@ from app.database.collection import (
     songs_collection,
     artists_collection,
     albums_collection,
-    playlists_collection,
-    genres_collection,
-    users_collection,
-    history_collection,
-    liked_songs_collection,
-    recent_collection,
-    likes_collection
 )
+
+# ----------------------------------------
+# HELPER: CLEAN MONGO DOCUMENT
+# ----------------------------------------
+def serialize(doc):
+    doc["id"] = str(doc["_id"])
+    del doc["_id"]
+    return doc
 
 
 # ----------------------------------------
@@ -23,31 +24,61 @@ async def search_all(query: str):
     if not query or query.strip() == "":
         raise HTTPException(status_code=400, detail="Query cannot be empty")
 
-    search_filter = {"$regex": query, "$options": "i"}
+    regex = {"$regex": query, "$options": "i"}
 
-    songs = await songs_collection.find({"title": search_filter}).to_list(20)
-    artists = await artists_collection.find({"name": search_filter}).to_list(20)
-    albums = await albums_collection.find({"title": search_filter}).to_list(20)
+    songs = []
+    async for song in songs_collection.find({"title": regex}).limit(20):
+        song = serialize(song)
+
+        # attach artist name
+        if song.get("artist_id"):
+            artist = await artists_collection.find_one(
+                {"_id": ObjectId(song["artist_id"])}
+            )
+            song["artist_name"] = artist["name"] if artist else "Unknown Artist"
+
+        songs.append(song)
+
+    artists = []
+    async for artist in artists_collection.find({"name": regex}).limit(20):
+        artists.append(serialize(artist))
+
+    albums = []
+    async for album in albums_collection.find({"title": regex}).limit(20):
+        albums.append(serialize(album))
 
     return {
         "songs": songs,
         "artists": artists,
-        "albums": albums
+        "albums": albums,
     }
 
 
 # ----------------------------------------
-# SEARCH SONGS ONLY
+# SEARCH SONGS ONLY (USED BY FLUTTER)
 # ----------------------------------------
 async def search_songs(query: str):
 
     if not query or query.strip() == "":
         raise HTTPException(status_code=400, detail="Query cannot be empty")
 
-    search_filter = {"title": {"$regex": query, "$options": "i"}}
+    regex = {"$regex": query, "$options": "i"}
 
-    songs = await songs_collection.find(search_filter).to_list(30)
-    return songs
+    results = []
+
+    async for song in songs_collection.find({"title": regex}).limit(30):
+        song = serialize(song)
+
+        # artist name
+        if song.get("artist_id"):
+            artist = await artists_collection.find_one(
+                {"_id": ObjectId(song["artist_id"])}
+            )
+            song["artist_name"] = artist["name"] if artist else "Unknown Artist"
+
+        results.append(song)
+
+    return results
 
 
 # ----------------------------------------
@@ -58,9 +89,12 @@ async def search_artists(query: str):
     if not query or query.strip() == "":
         raise HTTPException(status_code=400, detail="Query cannot be empty")
 
-    search_filter = {"name": {"$regex": query, "$options": "i"}}
+    regex = {"$regex": query, "$options": "i"}
 
-    artists = await artists_collection.find(search_filter).to_list(30)
+    artists = []
+    async for artist in artists_collection.find({"name": regex}).limit(30):
+        artists.append(serialize(artist))
+
     return artists
 
 
@@ -72,7 +106,10 @@ async def search_albums(query: str):
     if not query or query.strip() == "":
         raise HTTPException(status_code=400, detail="Query cannot be empty")
 
-    search_filter = {"title": {"$regex": query, "$options": "i"}}
+    regex = {"$regex": query, "$options": "i"}
 
-    albums = await albums_collection.find(search_filter).to_list(30)
+    albums = []
+    async for album in albums_collection.find({"title": regex}).limit(30):
+        albums.append(serialize(album))
+
     return albums
