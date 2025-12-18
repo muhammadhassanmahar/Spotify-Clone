@@ -57,14 +57,15 @@ class _HomeScreenState extends State<HomeScreen> {
             const Text(
               "Recently Played",
               style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
 
             const SizedBox(height: 10),
 
-            // 🔥 BACKEND SONGS (HORIZONTAL)
+            /// 🔥 BACKEND SONGS (HORIZONTAL)
             SizedBox(
               height: 150,
               child: FutureBuilder<List<dynamic>>(
@@ -73,13 +74,28 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (snapshot.connectionState ==
                       ConnectionState.waiting) {
                     return const Center(
-                        child: CircularProgressIndicator());
+                      child: CircularProgressIndicator(
+                        color: Colors.greenAccent,
+                      ),
+                    );
+                  }
+
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text(
+                        "Failed to load songs",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    );
                   }
 
                   if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return const Center(
-                        child: Text("No songs found",
-                            style: TextStyle(color: Colors.white)));
+                      child: Text(
+                        "No songs found",
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    );
                   }
 
                   final songs = snapshot.data!;
@@ -130,8 +146,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   song['title'] ?? "Unknown",
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style:
-                                      const TextStyle(color: Colors.white),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                  ),
                                 ),
                               ),
                             ],
@@ -149,14 +166,15 @@ class _HomeScreenState extends State<HomeScreen> {
             const Text(
               "Recommended For You",
               style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold),
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
             ),
 
             const SizedBox(height: 10),
 
-            // 🔥 SAME BACKEND DATA (GRID)
+            /// 🔥 SAME BACKEND DATA (GRID)
             FutureBuilder<List<dynamic>>(
               future: songsFuture,
               builder: (context, snapshot) {
@@ -217,8 +235,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 song['title'] ?? "Unknown",
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style:
-                                    const TextStyle(color: Colors.white),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ],
@@ -233,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      // ⭐ BOTTOM NAV BAR (UNCHANGED)
+      /// ⭐ BOTTOM NAV BAR (UNCHANGED)
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,
         selectedItemColor: Colors.greenAccent,
@@ -247,10 +266,18 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() => selectedIndex = index);
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
-          BottomNavigationBarItem(icon: Icon(Icons.search), label: "Search"),
           BottomNavigationBarItem(
-              icon: Icon(Icons.library_music), label: "Library"),
+            icon: Icon(Icons.home),
+            label: "Home",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: "Search",
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.library_music),
+            label: "Library",
+          ),
         ],
       ),
     );

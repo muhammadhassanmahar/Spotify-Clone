@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles   # ✅ ADD THIS
+from fastapi.staticfiles import StaticFiles
 
 # Routes
 from app.routes.auth_routes import router as auth_router
@@ -18,24 +18,31 @@ from app.routes.recent_routes import router as recent_router
 from app.routes.admin_routes import router as admin_router
 from app.routes.upload_routes import router as upload_router
 
-
-app = FastAPI(title="Spotify Clone API", version="1.0.0")
-
+# Services
+from app.services.auto_scan_service import auto_scan_uploads
 
 # -------------------------------------------------
-# CORS MIDDLEWARE (IMPORTANT FOR FRONTEND)
+# APP
+# -------------------------------------------------
+app = FastAPI(
+    title="Spotify Clone API",
+    version="1.0.0",
+    redirect_slashes=False
+)
+
+# -------------------------------------------------
+# CORS — OPEN (DEV)
 # -------------------------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],   # frontend domain yahan add kar sakte ho
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-
 # -------------------------------------------------
-# STATIC FILES (SONGS / IMAGES)
+# STATIC FILES
 # -------------------------------------------------
 app.mount(
     "/uploads",
@@ -43,9 +50,8 @@ app.mount(
     name="uploads"
 )
 
-
 # -------------------------------------------------
-# ROUTES REGISTER
+# ROUTES
 # -------------------------------------------------
 app.include_router(auth_router)
 app.include_router(user_router)
@@ -62,10 +68,22 @@ app.include_router(recent_router)
 app.include_router(admin_router)
 app.include_router(upload_router)
 
+# -------------------------------------------------
+# STARTUP — Auto Scan Enabled
+# -------------------------------------------------
+@app.on_event("startup")
+async def startup_event():
+    print("🔁 Backend started, running auto scan...")
+    await auto_scan_uploads()
+    print("✅ Auto scan completed")
 
 # -------------------------------------------------
-# ROOT ENDPOINT
+# ROOT
 # -------------------------------------------------
 @app.get("/")
 async def root():
-    return {"message": "Spotify Clone Backend Running!"}
+    return {
+        "status": "OK",
+        "message": "Spotify Clone Backend Running!",
+        "cors": "OPEN (DEV MODE)"
+    }

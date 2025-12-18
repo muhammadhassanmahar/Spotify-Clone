@@ -13,9 +13,9 @@ class _SearchScreenState extends State<SearchScreen> {
   List<dynamic> results = [];
   bool isLoading = false;
 
-  // 🔍 SEARCH FROM BACKEND
+  // 🔍 SEARCH FROM BACKEND (SONGS + ARTIST NAME)
   Future<void> searchSongs(String query) async {
-    if (query.isEmpty) {
+    if (query.trim().isEmpty) {
       setState(() => results = []);
       return;
     }
@@ -24,12 +24,17 @@ class _SearchScreenState extends State<SearchScreen> {
 
     try {
       final data = await ApiService.searchSongs(query);
-      setState(() => results = data);
+      setState(() {
+        results = data;
+      });
     } catch (e) {
       debugPrint("Search error: $e");
+      setState(() => results = []);
+    } finally {
+      if (mounted) {
+        setState(() => isLoading = false);
+      }
     }
-
-    setState(() => isLoading = false);
   }
 
   @override
@@ -60,8 +65,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         style: const TextStyle(color: Colors.white),
                         onChanged: searchSongs,
                         decoration: const InputDecoration(
-                          prefixIcon:
-                              Icon(Icons.search, color: Colors.white54),
+                          prefixIcon: Icon(Icons.search, color: Colors.white54),
                           hintText: 'Search',
                           hintStyle: TextStyle(color: Colors.white54),
                           border: InputBorder.none,
@@ -74,8 +78,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     onTap: () => Navigator.pop(context),
                     child: const Text(
                       'Cancel',
-                      style:
-                          TextStyle(color: Colors.white70, fontSize: 16),
+                      style: TextStyle(color: Colors.white70, fontSize: 16),
                     ),
                   )
                 ],
@@ -102,70 +105,97 @@ class _SearchScreenState extends State<SearchScreen> {
                           color: Colors.green,
                         ),
                       )
-                    : ListView.builder(
-                        physics: const BouncingScrollPhysics(),
-                        itemCount: results.length,
-                        itemBuilder: (context, index) {
-                          final song = results[index];
+                    : results.isEmpty
+                        ? const Center(
+                            child: Text(
+                              'No results found',
+                              style: TextStyle(
+                                color: Colors.white54,
+                                fontSize: 16,
+                              ),
+                            ),
+                          )
+                        : ListView.builder(
+                            physics: const BouncingScrollPhysics(),
+                            itemCount: results.length,
+                            itemBuilder: (context, index) {
+                              final song = results[index];
 
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                "/track_view",
-                                arguments: song,
-                              );
-                            },
-                            child: Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 8),
-                              child: Row(
-                                children: [
-                                  // IMAGE
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(6),
-                                    child: Image.network(
-                                      ApiService.imageUrl(
-                                        song['cover_image'] ??
-                                            'uploads/default.png',
-                                      ),
-                                      width: 55,
-                                      height: 55,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-
-                                  const SizedBox(width: 14),
-
-                                  // TEXT
-                                  Column(
+                              return GestureDetector(
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    "/track_view",
+                                    arguments: song,
+                                  );
+                                },
+                                child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  child: Row(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                        CrossAxisAlignment.center,
                                     children: [
-                                      Text(
-                                        song['title'],
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.w600,
+                                      // IMAGE
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(6),
+                                        child: Image.network(
+                                          ApiService.imageUrl(
+                                              song['cover_image'] ??
+                                                  'uploads/default.png'),
+                                          width: 55,
+                                          height: 55,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                            return Image.asset(
+                                              'assets/images/default.png',
+                                              width: 55,
+                                              height: 55,
+                                              fit: BoxFit.cover,
+                                            );
+                                          },
                                         ),
                                       ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        song['artist_name'] ?? 'Unknown Artist',
-                                        style: const TextStyle(
-                                          color: Colors.white54,
-                                          fontSize: 14,
+
+                                      const SizedBox(width: 14),
+
+                                      // TEXT
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              song['title'] ?? 'Unknown',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              song['artist_name'] ??
+                                                  'Unknown Artist',
+                                              style: const TextStyle(
+                                                color: Colors.white54,
+                                                fontSize: 14,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ],
                                         ),
                                       ),
                                     ],
                                   ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                                ),
+                              );
+                            },
+                          ),
               )
             ],
           ),

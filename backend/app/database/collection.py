@@ -1,4 +1,12 @@
-from .connection import db
+from motor.motor_asyncio import AsyncIOMotorClient
+
+# ------------------------------
+# MongoDB Connection
+# ------------------------------
+MONGO_URL = "mongodb://localhost:27017"
+
+client = AsyncIOMotorClient(MONGO_URL)
+db = client.spotify_db  # Database name
 
 # ------------------------------
 # Collection Name Constants
