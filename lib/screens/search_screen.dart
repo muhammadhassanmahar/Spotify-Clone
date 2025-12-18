@@ -13,28 +13,36 @@ class _SearchScreenState extends State<SearchScreen> {
   List<dynamic> results = [];
   bool isLoading = false;
 
-  // 🔍 SEARCH FROM BACKEND (SONGS + ARTIST NAME)
+  // 🔍 SEARCH FROM BACKEND
   Future<void> searchSongs(String query) async {
     if (query.trim().isEmpty) {
-      setState(() => results = []);
+      if (mounted) setState(() => results = []);
       return;
     }
 
-    setState(() => isLoading = true);
+    if (mounted) setState(() => isLoading = true);
 
     try {
-      final data = await ApiService.searchSongs(query);
-      setState(() {
-        results = data;
-      });
+      final List<dynamic> data =
+          await ApiService.searchSongs(query);
+
+      if (mounted) {
+        setState(() {
+          results = data;
+        });
+      }
     } catch (e) {
       debugPrint("Search error: $e");
-      setState(() => results = []);
+      if (mounted) setState(() => results = []);
     } finally {
-      if (mounted) {
-        setState(() => isLoading = false);
-      }
+      if (mounted) setState(() => isLoading = false);
     }
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -65,7 +73,8 @@ class _SearchScreenState extends State<SearchScreen> {
                         style: const TextStyle(color: Colors.white),
                         onChanged: searchSongs,
                         decoration: const InputDecoration(
-                          prefixIcon: Icon(Icons.search, color: Colors.white54),
+                          prefixIcon:
+                              Icon(Icons.search, color: Colors.white54),
                           hintText: 'Search',
                           hintStyle: TextStyle(color: Colors.white54),
                           border: InputBorder.none,
@@ -78,7 +87,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     onTap: () => Navigator.pop(context),
                     child: const Text(
                       'Cancel',
-                      style: TextStyle(color: Colors.white70, fontSize: 16),
+                      style:
+                          TextStyle(color: Colors.white70, fontSize: 16),
                     ),
                   )
                 ],
@@ -119,73 +129,94 @@ class _SearchScreenState extends State<SearchScreen> {
                             physics: const BouncingScrollPhysics(),
                             itemCount: results.length,
                             itemBuilder: (context, index) {
-                              final song = results[index];
+                              final Map<String, dynamic> song =
+                                  results[index] as Map<String, dynamic>;
+
+                              final String title =
+                                  song['title']?.toString() ??
+                                      'Unknown Song';
+
+                              final String artist =
+                                  song['artist_name']?.toString() ??
+                                      'Unknown Artist';
+
+                              // ✅ SAFE IMAGE URL (IMPORTANT FIX)
+                              final String imageUrl =
+                                  (song['cover_image'] != null &&
+                                          song['cover_image']
+                                              .toString()
+                                              .isNotEmpty)
+                                      ? ApiService.imageUrl(
+                                          song['cover_image'].toString())
+                                      : '';
 
                               return GestureDetector(
                                 onTap: () {
+                                  // 🔥 FIXED: Full song object pass kar rahe
                                   Navigator.pushNamed(
                                     context,
                                     "/track_view",
-                                    arguments: song,
+                                    arguments: song, // ✅ FULL SONG
                                   );
                                 },
                                 child: Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 8),
                                   child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
                                     children: [
-                                      // IMAGE
                                       ClipRRect(
-                                        borderRadius: BorderRadius.circular(6),
-                                        child: Image.network(
-                                          ApiService.imageUrl(
-                                              song['cover_image'] ??
-                                                  'uploads/default.png'),
-                                          width: 55,
-                                          height: 55,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            return Image.asset(
-                                              'assets/images/default.png',
-                                              width: 55,
-                                              height: 55,
-                                              fit: BoxFit.cover,
-                                            );
-                                          },
-                                        ),
+                                        borderRadius:
+                                            BorderRadius.circular(6),
+                                        child: imageUrl.isNotEmpty
+                                            ? Image.network(
+                                                imageUrl,
+                                                width: 55,
+                                                height: 55,
+                                                fit: BoxFit.cover,
+                                                errorBuilder:
+                                                    (_, __, ___) =>
+                                                        Image.asset(
+                                                  'assets/images/default.png',
+                                                  width: 55,
+                                                  height: 55,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                              )
+                                            : Image.asset(
+                                                'assets/images/default.png',
+                                                width: 55,
+                                                height: 55,
+                                                fit: BoxFit.cover,
+                                              ),
                                       ),
-
                                       const SizedBox(width: 14),
-
-                                      // TEXT
                                       Expanded(
                                         child: Column(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
                                           children: [
                                             Text(
-                                              song['title'] ?? 'Unknown',
+                                              title,
+                                              maxLines: 1,
+                                              overflow:
+                                                  TextOverflow.ellipsis,
                                               style: const TextStyle(
                                                 color: Colors.white,
                                                 fontSize: 17,
-                                                fontWeight: FontWeight.w600,
+                                                fontWeight:
+                                                    FontWeight.w600,
                                               ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
-                                              song['artist_name'] ??
-                                                  'Unknown Artist',
+                                              artist,
+                                              maxLines: 1,
+                                              overflow:
+                                                  TextOverflow.ellipsis,
                                               style: const TextStyle(
                                                 color: Colors.white54,
                                                 fontSize: 14,
                                               ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
                                             ),
                                           ],
                                         ),
@@ -196,7 +227,7 @@ class _SearchScreenState extends State<SearchScreen> {
                               );
                             },
                           ),
-              )
+              ),
             ],
           ),
         ),

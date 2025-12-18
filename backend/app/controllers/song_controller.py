@@ -31,9 +31,19 @@ async def enrich_song(song: dict):
         if album:
             album_name = album.get("title")
 
+    # 🔥 IMPORTANT: AUDIO FIELD FIX
+    # MongoDB me 'audio' ya 'audio_url' jo bhi ho, Flutter ko 'audio_url' milega
+    audio_path = song.get("audio") or song.get("audio_url")
+
     song["id"] = str(song["_id"])
     song["artist_name"] = artist_name
     song["album_name"] = album_name
+    song["audio_url"] = audio_path  # ✅ Flutter expects this
+
+    # Optional: agar cover image hai
+    if song.get("cover_image"):
+        song["cover_image"] = song.get("cover_image")
+
     del song["_id"]
 
     return song

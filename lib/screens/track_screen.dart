@@ -10,21 +10,47 @@ class TrackScreen extends StatefulWidget {
 }
 
 class _TrackScreenState extends State<TrackScreen> {
-  late AudioPlayer _player;
+  late final AudioPlayer _player;
+
   bool isPlaying = false;
+  int currentIndex = 0;
+  List<dynamic> songs = [];
   String? currentAudioUrl;
+  bool _dataLoaded = false;
 
   @override
   void initState() {
     super.initState();
     _player = AudioPlayer();
 
-    // Listen to player state to update icon when song ends or pauses
     _player.playerStateStream.listen((state) {
+      if (!mounted) return;
       setState(() {
         isPlaying = state.playing;
       });
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_dataLoaded) return;
+
+    final args = ModalRoute.of(context)?.settings.arguments;
+
+    if (args is Map<String, dynamic>) {
+      songs = List<dynamic>.from(args['songs'] ?? []);
+      currentIndex =
+          args['index'] is int ? args['index'] as int : 0;
+
+      if (songs.isNotEmpty && currentIndex < songs.length) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          playSongByIndex(currentIndex);
+        });
+      }
+    }
+
+    _dataLoaded = true;
   }
 
   @override
@@ -33,50 +59,82 @@ class _TrackScreenState extends State<TrackScreen> {
     super.dispose();
   }
 
-  Future<void> playAudio(String url) async {
+  Future<void> playSongByIndex(int index) async {
+    if (songs.isEmpty || index < 0 || index >= songs.length) return;
+
+    final song = songs[index] as Map<String, dynamic>;
+    final audioPath = song['audio']?.toString() ?? '';
+
+    if (audioPath.isEmpty) {
+      debugPrint("❌ Audio path missing");
+      return;
+    }
+
+    final audioUrl = ApiService.audioUrl(audioPath);
+
     try {
-      if (currentAudioUrl != url) {
-        currentAudioUrl = url;
-        await _player.setUrl(url);
+      currentIndex = index;
+
+      if (currentAudioUrl != audioUrl) {
+        currentAudioUrl = audioUrl;
+        await _player.setUrl(audioUrl);
       }
 
-      if (_player.playing) {
-        await _player.pause();
-      } else {
-        await _player.play();
-      }
-    } catch (e, stackTrace) {
-      debugPrint("❌ Error playing audio: $e");
-      debugPrintStack(stackTrace: stackTrace);
+      await _player.play();
+    } catch (e) {
+      debugPrint("❌ Play error: $e");
+    }
+  }
+
+  void togglePlayPause() {
+    _player.playing ? _player.pause() : _player.play();
+  }
+
+  void playNext() {
+    if (currentIndex < songs.length - 1) {
+      playSongByIndex(currentIndex + 1);
+    }
+  }
+
+  void playPrevious() {
+    if (currentIndex > 0) {
+      playSongByIndex(currentIndex - 1);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final args = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+    if (songs.isEmpty || currentIndex >= songs.length) {
+      return _error("Song not found");
+    }
 
-    final String title = args?['title'] ?? "Unknown Song";
-    final String artist = args?['artist_name'] ?? "Unknown Artist";
-    final String image = args?['cover_image'] != null
-        ? ApiService.imageUrl(args!['cover_image'])
-        : "https://i.scdn.co/image/ab67616d00001e0208dd3f0bcb7b4f31f27e5f1e";
-    final String audio = args?['audio'] != null
-        ? ApiService.audioUrl(args!['audio'])
-        : "";
+    final song = songs[currentIndex] as Map<String, dynamic>;
 
-    final mq = MediaQuery.of(context);
-    final w = mq.size.width;
-    final isWide = w >= 600;
-    double coverSize = isWide ? w * 0.30 : w * 0.55;
+    final String title =
+        song['title']?.toString().isNotEmpty == true
+            ? song['title'].toString()
+            : "Unknown Song";
+
+    final String artist =
+        song['artist_name']?.toString().isNotEmpty == true
+            ? song['artist_name'].toString()
+            : "Unknown Artist";
+
+    final String coverPath =
+        song['cover_image']?.toString() ?? '';
+
+    final String? imageUrl =
+        coverPath.isNotEmpty ? ApiService.imageUrl(coverPath) : null;
+
+    final w = MediaQuery.of(context).size.width;
+    final coverSize = w > 600 ? w * 0.3 : w * 0.55;
 
     return Scaffold(
-      backgroundColor: const Color(0xff000000),
+      backgroundColor: Colors.black,
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 12),
-
-            // ---------- TOP GRADIENT + TITLE ----------
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -84,141 +142,80 @@ class _TrackScreenState extends State<TrackScreen> {
                   begin: Alignment.topCenter,
                   end: Alignment.center,
                   colors: [
-                    const Color(0xFF7A2E2E).withOpacity(0.95),
+                    const Color(0xFF7A2E2E)
+                        .withValues(alpha: 0.95),
                     Colors.transparent,
                   ],
                 ),
               ),
               child: Column(
                 children: [
-                  /// Album cover
                   ClipRRect(
                     borderRadius: BorderRadius.circular(6),
-                    child: Image.network(
-                      image,
-                      width: coverSize,
-                      height: coverSize,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: coverSize,
-                          height: coverSize,
-                          color: Colors.grey,
-                          child: const Icon(Icons.music_note, color: Colors.white, size: 50),
-                        );
-                      },
-                    ),
+                    child: imageUrl != null
+                        ? Image.network(
+                            imageUrl,
+                            width: coverSize,
+                            height: coverSize,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) =>
+                                _fallbackCover(coverSize),
+                          )
+                        : _fallbackCover(coverSize),
                   ),
-
                   const SizedBox(height: 20),
-
-                  /// Title
                   Text(
                     title,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 24,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
                   ),
-
                   const SizedBox(height: 5),
-
-                  /// Artist
                   Text(
                     artist,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.70),
-                      fontSize: 16,
-                    ),
+                    style:
+                        const TextStyle(color: Colors.white70),
                   ),
-
-                  const SizedBox(height: 18),
-
-                  /// Play / Pause Button
-                  GestureDetector(
-                    onTap: () {
-                      if (audio.isNotEmpty) {
-                        playAudio(audio);
-                      }
-                    },
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white24,
-                        shape: BoxShape.circle,
+                  const SizedBox(height: 22),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.skip_previous,
+                            color: Colors.white),
+                        iconSize: 40,
+                        onPressed: playPrevious,
                       ),
-                      padding: const EdgeInsets.all(20),
-                      child: Icon(
-                        isPlaying ? Icons.pause : Icons.play_arrow,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 18),
-                ],
-              ),
-            ),
-
-            // ---------- OPTIONS LIST ----------
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: w * 0.06),
-                child: Column(
-                  children: [
-                    option(Icons.favorite_border, "Like"),
-                    option(Icons.remove_circle_outline, "Hide song"),
-                    option(Icons.playlist_add, "Add to playlist"),
-                    option(Icons.queue_music, "Add to queue"),
-                    InkWell(
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        "/song_share",
-                        arguments: {
-                          "title": title,
-                          "artist_name": artist,
-                          "cover_image": image,
-                        },
-                      ),
-                      child: option(Icons.share, "Share"),
-                    ),
-                    option(Icons.radio, "Go to radio"),
-                    InkWell(
-                      onTap: () => Navigator.pushNamed(context, "/album_view"),
-                      child: option(Icons.album_outlined, "View album"),
-                    ),
-                    InkWell(
-                      onTap: () => Navigator.pushNamed(context, "/artists"),
-                      child: option(Icons.person_outline, "View artist"),
-                    ),
-                    option(Icons.info_outline, "Song credits"),
-                    option(Icons.nightlight_round, "Sleep timer"),
-                    const SizedBox(height: 35),
-                    Container(
-                      width: 60,
-                      height: 4,
-                      decoration: BoxDecoration(
-                        color: Colors.white24,
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                    const SizedBox(height: 18),
-                    GestureDetector(
-                      onTap: () => Navigator.pop(context),
-                      child: const Text(
-                        "Close",
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w600,
+                      GestureDetector(
+                        onTap: togglePlayPause,
+                        child: Container(
+                          padding:
+                              const EdgeInsets.all(20),
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white24,
+                          ),
+                          child: Icon(
+                            isPlaying
+                                ? Icons.pause
+                                : Icons.play_arrow,
+                            color: Colors.white,
+                            size: 42,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 20),
-                  ],
-                ),
+                      IconButton(
+                        icon: const Icon(Icons.skip_next,
+                            color: Colors.white),
+                        iconSize: 40,
+                        onPressed: playNext,
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -227,22 +224,27 @@ class _TrackScreenState extends State<TrackScreen> {
     );
   }
 
-  /// ---- OPTION ROW ----
-  Widget option(IconData icon, String title) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Row(
-        children: [
-          Icon(icon, color: Colors.white70, size: 26),
-          const SizedBox(width: 14),
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 17,
-            ),
-          ),
-        ],
+  Widget _fallbackCover(double size) {
+    return Container(
+      width: size,
+      height: size,
+      color: Colors.grey,
+      child: const Icon(
+        Icons.music_note,
+        color: Colors.white,
+        size: 40,
+      ),
+    );
+  }
+
+  Widget _error(String msg) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Text(
+          msg,
+          style: const TextStyle(color: Colors.white),
+        ),
       ),
     );
   }

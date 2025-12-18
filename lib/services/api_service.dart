@@ -8,92 +8,89 @@ class ApiService {
   // 🔥 AUTO BASE URL
   // ------------------------------------
   static String get baseUrl {
-    // Web
     if (kIsWeb) {
       return "http://localhost:8000";
     }
-
-    // Android Emulator
     if (Platform.isAndroid) {
       return "http://10.0.2.2:8000";
     }
-
-    // iOS Simulator
     if (Platform.isIOS) {
       return "http://localhost:8000";
     }
-
-    // Real Device (change IP if needed)
     return "http://192.168.1.100:8000";
+  }
+
+  // ------------------------------------
+  // 🛡 SAFE JSON LIST PARSER
+  // ------------------------------------
+  static List<dynamic> _safeList(dynamic body) {
+    if (body is List) return body;
+    debugPrint("❌ API returned non-list: $body");
+    return [];
   }
 
   // ------------------------------------
   // 🎵 GET ALL SONGS
   // ------------------------------------
   static Future<List<dynamic>> getAllSongs() async {
-    final url = Uri.parse("$baseUrl/songs");
-    final response = await http.get(url);
+    try {
+      final response = await http.get(Uri.parse("$baseUrl/songs"));
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception("Failed to load songs");
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return _safeList(decoded);
+      }
+    } catch (e) {
+      debugPrint("❌ getAllSongs error: $e");
     }
+    return [];
   }
 
   // ------------------------------------
-  // 🎵 GET SONG BY ID
-  // ------------------------------------
-  static Future<Map<String, dynamic>> getSongById(String songId) async {
-    final url = Uri.parse("$baseUrl/songs/$songId");
-    final response = await http.get(url);
-
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception("Failed to load song");
-    }
-  }
-
-  // ------------------------------------
-  // 🔍 SEARCH SONGS
+  // 🔍 SEARCH SONGS (FIXED)
   // ------------------------------------
   static Future<List<dynamic>> searchSongs(String query) async {
     if (query.trim().isEmpty) return [];
 
-    final encodedQuery = Uri.encodeQueryComponent(query);
-    final url = Uri.parse("$baseUrl/search/songs?query=$encodedQuery");
+    try {
+      final encodedQuery = Uri.encodeQueryComponent(query);
+      final url = Uri.parse("$baseUrl/search/songs?query=$encodedQuery");
 
-    final response = await http.get(url);
+      final response = await http.get(url);
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception("Search failed");
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return _safeList(decoded);
+      }
+    } catch (e) {
+      debugPrint("❌ searchSongs error: $e");
     }
+
+    return [];
   }
 
   // ------------------------------------
   // 🎤 GET ALL ARTISTS
   // ------------------------------------
   static Future<List<dynamic>> getAllArtists() async {
-    final url = Uri.parse("$baseUrl/artists");
-    final response = await http.get(url);
+    try {
+      final response = await http.get(Uri.parse("$baseUrl/artists"));
 
-    if (response.statusCode == 200) {
-      return jsonDecode(response.body);
-    } else {
-      throw Exception("Failed to load artists");
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return _safeList(decoded);
+      }
+    } catch (e) {
+      debugPrint("❌ getAllArtists error: $e");
     }
+    return [];
   }
 
   // ------------------------------------
   // 🔊 FULL AUDIO URL
   // ------------------------------------
   static String audioUrl(String path) {
-    if (path.startsWith("http")) {
-      return path; // Already full URL
-    }
+    if (path.startsWith("http")) return path;
     return "$baseUrl/$path";
   }
 
@@ -101,9 +98,7 @@ class ApiService {
   // 🖼 FULL IMAGE URL
   // ------------------------------------
   static String imageUrl(String path) {
-    if (path.startsWith("http")) {
-      return path; // Already full URL
-    }
+    if (path.startsWith("http")) return path;
     return "$baseUrl/$path";
   }
 }
