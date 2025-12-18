@@ -39,16 +39,13 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
             ? song['artist_name']
             : "Unknown Artist";
 
-    // ✅ AUDIO PATH (supports both keys)
     final String audioPath =
         (song['audio_url'] ?? song['audio'] ?? '').toString();
 
     final String? audioUrl =
         audioPath.isNotEmpty ? ApiService.audioUrl(audioPath) : null;
 
-    // ✅ COVER IMAGE SAFE
-    final String coverPath =
-        song['cover_image']?.toString() ?? '';
+    final String coverPath = song['cover_image']?.toString() ?? '';
 
     final String? coverImage =
         coverPath.isNotEmpty ? ApiService.imageUrl(coverPath) : null;
@@ -60,13 +57,22 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
           children: [
             // Top Bar
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  BackButton(color: Colors.white),
-                  Icon(Icons.more_horiz, color: Colors.white)
+                children: [
+                  const BackButton(color: Colors.white),
+
+                  // 🔥 ONLY CHANGE: navigation added here
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.pushNamed(context, '/trackScreen');
+                    },
+                    child: const Icon(
+                      Icons.more_horiz,
+                      color: Colors.white,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -82,8 +88,7 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
                       ? Image.network(
                           coverImage,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) =>
-                              _fallbackCover(),
+                          errorBuilder: (_, __, ___) => _fallbackCover(),
                         )
                       : _fallbackCover(),
                 ),
@@ -105,8 +110,7 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
 
             Text(
               artist,
-              style:
-                  const TextStyle(color: Colors.white70, fontSize: 14),
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
             ),
 
             // Progress Bar
@@ -117,33 +121,29 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
                 final duration = _player.duration ?? Duration.zero;
 
                 return Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 16),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
                   child: Column(
                     children: [
                       Slider(
                         value: position.inSeconds.toDouble(),
                         max: duration.inSeconds.toDouble() + 1,
                         onChanged: (value) {
-                          _player.seek(
-                              Duration(seconds: value.toInt()));
+                          _player.seek(Duration(seconds: value.toInt()));
                         },
                         activeColor: Colors.white,
                         inactiveColor: Colors.white24,
                       ),
                       Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
                             _formatTime(position),
-                            style: const TextStyle(
-                                color: Colors.white70),
+                            style: const TextStyle(color: Colors.white70),
                           ),
                           Text(
                             "-${_formatTime(duration - position)}",
-                            style: const TextStyle(
-                                color: Colors.white70),
+                            style: const TextStyle(color: Colors.white70),
                           )
                         ],
                       )
@@ -155,23 +155,18 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
 
             // Controls
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 32, vertical: 10),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
               child: Row(
-                mainAxisAlignment:
-                    MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Icon(Icons.shuffle, color: Colors.white),
-
                   const Icon(Icons.skip_previous,
                       color: Colors.white, size: 40),
 
                   GestureDetector(
                     onTap: () async {
-                      if (audioUrl == null) {
-                        debugPrint("❌ Audio URL missing");
-                        return;
-                      }
+                      if (audioUrl == null) return;
 
                       if (isPlaying) {
                         await _player.pause();
@@ -196,7 +191,6 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
 
                   const Icon(Icons.skip_next,
                       color: Colors.white, size: 40),
-
                   const Icon(Icons.repeat, color: Colors.green),
                 ],
               ),
@@ -208,12 +202,10 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
-              decoration:
-                  const BoxDecoration(color: Color(0xFFDA6A2A)),
+              decoration: const BoxDecoration(color: Color(0xFFDA6A2A)),
               child: const Text(
                 'Lyrics',
-                style:
-                    TextStyle(color: Colors.white, fontSize: 18),
+                style: TextStyle(color: Colors.white, fontSize: 18),
                 textAlign: TextAlign.center,
               ),
             )
@@ -227,8 +219,7 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
     return Container(
       color: Colors.black26,
       child: const Center(
-        child: Icon(Icons.music_note,
-            color: Colors.white, size: 40),
+        child: Icon(Icons.music_note, color: Colors.white, size: 40),
       ),
     );
   }
@@ -237,8 +228,7 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        child: Text(msg,
-            style: const TextStyle(color: Colors.white)),
+        child: Text(msg, style: const TextStyle(color: Colors.white)),
       ),
     );
   }
