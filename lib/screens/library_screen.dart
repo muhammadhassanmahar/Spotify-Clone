@@ -1,11 +1,27 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart'; // backend service
 
-class LibraryScreen extends StatelessWidget {
+class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
 
   static const backgroundColor = Color(0xFF121212);
   static const accentText = Colors.white;
   static const mutedText = Color(0xFF9A9A9A);
+
+  @override
+  State<LibraryScreen> createState() => _LibraryScreenState();
+}
+
+class _LibraryScreenState extends State<LibraryScreen> {
+  late Future<List<dynamic>> likedSongsFuture;
+  late Future<List<dynamic>> artistsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    likedSongsFuture = ApiService.getLikedSongs(); // backend fetch
+    artistsFuture = ApiService.getSelectedArtists(); // backend fetch
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +32,7 @@ class LibraryScreen extends StatelessWidget {
     final avatarSize = isLarge ? 48.0 : 40.0;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: LibraryScreen.backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -27,15 +43,14 @@ class LibraryScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: avatarSize / 2,
-                    backgroundImage: NetworkImage(
-                        'https://i.pravatar.cc/300'), // replace with your asset or url
+                    backgroundImage: NetworkImage('https://i.pravatar.cc/300'),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'Your Library',
                       style: TextStyle(
-                        color: accentText,
+                        color: LibraryScreen.accentText,
                         fontSize: isLarge ? 26 : 22,
                         fontWeight: FontWeight.w700,
                       ),
@@ -77,9 +92,9 @@ class LibraryScreen extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.swap_vert, color: mutedText, size: 18),
+                      Icon(Icons.swap_vert, color: LibraryScreen.mutedText, size: 18),
                       const SizedBox(width: 8),
-                      Text('Recently played', style: TextStyle(color: mutedText)),
+                      Text('Recently played', style: TextStyle(color: LibraryScreen.mutedText)),
                     ],
                   ),
                   IconButton(
@@ -97,48 +112,38 @@ class LibraryScreen extends StatelessWidget {
               child: ListView(
                 padding: EdgeInsets.symmetric(horizontal: sidePadding),
                 children: [
-                  _likedSongsTile(isLarge),
-                  const SizedBox(height: 12),
-                  _simpleItem(
-                    title: 'New Episodes',
-                    subtitle: 'Updated 2 days ago',
-                    imageUrl: 'https://picsum.photos/200/200?1',
-                    square: true,
+                  FutureBuilder<List<dynamic>>(
+                    future: likedSongsFuture,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const SizedBox(); // no liked songs
+                      }
+                      return _likedSongsTile(isLarge, snapshot.data!);
+                    },
                   ),
                   const SizedBox(height: 12),
-                  _simpleItem(
-                    title: 'Lolo Zouaï',
-                    subtitle: 'Artist',
-                    imageUrl: 'https://picsum.photos/200/200?2',
-                    square: false,
-                  ),
-                  const SizedBox(height: 12),
-                  _simpleItem(
-                    title: 'Lana Del Rey',
-                    subtitle: 'Artist',
-                    imageUrl: 'https://picsum.photos/200/200?3',
-                    square: false,
-                  ),
-                  const SizedBox(height: 12),
-                  _simpleItem(
-                    title: 'Front Left',
-                    subtitle: 'Playlist • Spotify',
-                    imageUrl: 'https://picsum.photos/200/200?4',
-                    square: true,
-                  ),
-                  const SizedBox(height: 12),
-                  _simpleItem(
-                    title: 'Marvin Gaye',
-                    subtitle: 'Artist',
-                    imageUrl: 'https://picsum.photos/200/200?5',
-                    square: false,
-                  ),
-                  const SizedBox(height: 12),
-                  _simpleItem(
-                    title: 'Les',
-                    subtitle: 'Song • Childish Gambino',
-                    imageUrl: 'https://picsum.photos/200/200?6',
-                    square: true,
+                  FutureBuilder<List<dynamic>>(
+                    future: artistsFuture,
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const SizedBox();
+                      }
+                      return Column(
+                        children: snapshot.data!.map((artist) {
+                          return Column(
+                            children: [
+                              _simpleItem(
+                                title: artist['name'] ?? "Unknown Artist",
+                                subtitle: "Artist",
+                                imageUrl: artist['image'] ?? "https://picsum.photos/200",
+                                square: false,
+                              ),
+                              const SizedBox(height: 12),
+                            ],
+                          );
+                        }).toList(),
+                      );
+                    },
                   ),
                   const SizedBox(height: 48), // space before bottom nav
                 ],
@@ -148,12 +153,16 @@ class LibraryScreen extends StatelessWidget {
             // Bottom navigation imitation
             Container(
               padding: EdgeInsets.symmetric(vertical: 10),
-              color: backgroundColor,
+              color: LibraryScreen.backgroundColor,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _bottomNavItem(Icons.home, 'Home', active: false),
-                  _bottomNavItem(Icons.search, 'Search', active: false),
+                  GestureDetector(
+                      onTap: () => Navigator.pushReplacementNamed(context, "/home"),
+                      child: _bottomNavItem(Icons.home, 'Home', active: false)),
+                  GestureDetector(
+                      onTap: () => Navigator.pushReplacementNamed(context, "/search"),
+                      child: _bottomNavItem(Icons.search, 'Search', active: false)),
                   _bottomNavItem(Icons.library_music, 'Your Library', active: true),
                 ],
               ),
@@ -177,12 +186,11 @@ class LibraryScreen extends StatelessWidget {
     );
   }
 
-  Widget _likedSongsTile(bool isLarge) {
+  Widget _likedSongsTile(bool isLarge, List<dynamic> likedSongs) {
     return GestureDetector(
       onTap: () {},
       child: Row(
         children: [
-          // gradient square with heart
           Container(
             width: isLarge ? 64 : 56,
             height: isLarge ? 64 : 56,
@@ -202,10 +210,10 @@ class LibraryScreen extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text('Liked Songs', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
-                SizedBox(height: 6),
-                Text('Playlist • 58 songs', style: TextStyle(color: Color(0xFF9A9A9A), fontSize: 13)),
+              children: [
+                Text('Liked Songs', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                const SizedBox(height: 6),
+                Text('Playlist • ${likedSongs.length} songs', style: const TextStyle(color: Color(0xFF9A9A9A), fontSize: 13)),
               ],
             ),
           ),

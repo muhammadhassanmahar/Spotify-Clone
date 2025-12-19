@@ -87,6 +87,40 @@ class ApiService {
   }
 
   // ------------------------------------
+  // 💚 GET LIKED SONGS
+  // ------------------------------------
+  static Future<List<dynamic>> getLikedSongs() async {
+    try {
+      final response = await http.get(Uri.parse("$baseUrl/songs/liked"));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return _safeList(decoded);
+      }
+    } catch (e) {
+      debugPrint("❌ getLikedSongs error: $e");
+    }
+    return [];
+  }
+
+  // ------------------------------------
+  // 🎨 GET SELECTED ARTISTS
+  // ------------------------------------
+  static Future<List<dynamic>> getSelectedArtists() async {
+    try {
+      final response = await http.get(Uri.parse("$baseUrl/artists/selected"));
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return _safeList(decoded);
+      }
+    } catch (e) {
+      debugPrint("❌ getSelectedArtists error: $e");
+    }
+    return [];
+  }
+
+  // ------------------------------------
   // 🔊 FULL AUDIO URL
   // ------------------------------------
   static String audioUrl(String path) {
