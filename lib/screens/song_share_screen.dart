@@ -29,8 +29,7 @@ class SongShareScreen extends StatelessWidget {
         coverPath.isNotEmpty ? ApiService.imageUrl(coverPath) : null;
 
     // 🔗 SONG LINK (example)
-    final songLink =
-        "https://yourapp.com/song/${song['id'] ?? ''}";
+    final songLink = "https://yourapp.com/song/${song['id'] ?? ''}";
 
     final height = MediaQuery.of(context).size.height;
 
@@ -46,8 +45,7 @@ class SongShareScreen extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child:
-                      const Icon(Icons.close, color: Colors.white),
+                  child: const Icon(Icons.close, color: Colors.white),
                 ),
                 const Text("Share",
                     style: TextStyle(
@@ -86,8 +84,7 @@ class SongShareScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold)),
 
           Text(artist,
-              style:
-                  const TextStyle(color: Colors.grey, fontSize: 16)),
+              style: const TextStyle(color: Colors.grey, fontSize: 16)),
 
           SizedBox(height: height * 0.05),
 
@@ -96,16 +93,15 @@ class SongShareScreen extends StatelessWidget {
             spacing: 30,
             runSpacing: 25,
             children: [
-              _btn(Icons.link, "Copy Link",
+              _btn("assets/icons/link.png", "Copy Link",
                   () => SharePlus.instance.share(ShareParams(text: songLink))),
-              _btn(Icons.share, "WhatsApp",
+              _btn("assets/icons/whatsapp.png", "WhatsApp",
                   () => _open("https://wa.me/?text=$songLink")),
-              _btn(Icons.alternate_email, "Twitter",
-                  () => _open(
-                      "https://twitter.com/intent/tweet?text=$songLink")),
-              _btn(Icons.message, "Messages",
+              _btn("assets/icons/twitter.png", "Twitter",
+                  () => _open("https://twitter.com/intent/tweet?text=$songLink")),
+              _btn("assets/icons/message.png", "Messages",
                   () => SharePlus.instance.share(ShareParams(text: songLink))),
-              _btn(Icons.more_horiz, "More",
+              _btn("assets/icons/more.png", "More",
                   () => SharePlus.instance.share(ShareParams(text: songLink))),
             ],
           ),
@@ -128,7 +124,7 @@ class SongShareScreen extends StatelessWidget {
     );
   }
 
-  Widget _btn(IconData icon, String label, VoidCallback onTap) {
+  Widget _btn(String assetPath, String label, VoidCallback onTap) {
     return Column(
       children: [
         GestureDetector(
@@ -140,7 +136,10 @@ class SongShareScreen extends StatelessWidget {
               color: Color(0xFF2C2C2C),
               shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: Colors.white),
+            child: Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Image.asset(assetPath, fit: BoxFit.contain),
+            ),
           ),
         ),
         const SizedBox(height: 6),
