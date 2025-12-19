@@ -8,7 +8,7 @@ class TrackScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    // 🔥 SAME SONG DATA FROM TRACK VIEW
+    // 🔥 SONG DATA FROM TRACK VIEW SCREEN
     final song =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
@@ -68,7 +68,7 @@ class TrackScreen extends StatelessWidget {
 
             const SizedBox(height: 4),
 
-            // 👤 ARTIST
+            // 👤 ARTIST NAME
             Text(
               artist,
               style: const TextStyle(
@@ -79,7 +79,7 @@ class TrackScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // ⚙ OPTIONS (UNCHANGED)
+            // ⚙ OPTIONS (UI SAME)
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -89,7 +89,7 @@ class TrackScreen extends StatelessWidget {
                   _option(Icons.playlist_add, 'Add to playlist'),
                   _option(Icons.queue_music, 'Add to queue'),
 
-                  // ✅ SHARE → SONG SHARE SCREEN WITH SAME SONG
+                  // 🔗 SHARE (SAME SONG DATA)
                   ListTile(
                     leading:
                         const Icon(Icons.share, color: Colors.white70),
@@ -136,8 +136,7 @@ class TrackScreen extends StatelessWidget {
   static Widget _option(IconData icon, String title) {
     return ListTile(
       leading: Icon(icon, color: Colors.white70),
-      title:
-          Text(title, style: const TextStyle(color: Colors.white))),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
       onTap: () {},
     );
   }
