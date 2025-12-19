@@ -5,7 +5,7 @@ class User {
   final String id;
   final String name;
   final String email;
-  final String? imageUrl; // ✅ added imageUrl
+  final String? imageUrl; // optional imageUrl
 
   User({
     required this.id,
@@ -20,7 +20,7 @@ class User {
       id: json['id'] ?? '',
       name: json['name'] ?? 'User',
       email: json['email'] ?? '',
-      imageUrl: json['image'] ?? null, // ✅ set from backend field
+      imageUrl: json['image'], // ✅ removed unnecessary '?? null'
     );
   }
 }
