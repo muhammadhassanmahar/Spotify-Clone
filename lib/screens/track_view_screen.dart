@@ -66,7 +66,7 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
                   // 🔥 ONLY CHANGE: navigation added here
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/trackScreen');
+                      Navigator.pushNamed(context, '/track_screen');
                     },
                     child: const Icon(
                       Icons.more_horiz,
