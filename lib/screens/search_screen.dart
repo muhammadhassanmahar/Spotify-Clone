@@ -26,7 +26,11 @@ class _SearchScreenState extends State<SearchScreen> {
       return;
     }
 
-    if (mounted) setState(() => isLoading = true);
+    if (mounted) {
+      setState(() {
+        isLoading = true;
+      });
+    }
 
     try {
       final List<dynamic> songs = await ApiService.searchSongs(query);
@@ -40,12 +44,18 @@ class _SearchScreenState extends State<SearchScreen> {
       }
     } catch (e) {
       debugPrint("Search error: $e");
-      if (mounted) setState(() {
-        songResults = [];
-        albumResults = [];
-      });
+      if (mounted) {
+        setState(() {
+          songResults = [];
+          albumResults = [];
+        });
+      }
     } finally {
-      if (mounted) setState(() => isLoading = false);
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
@@ -137,150 +147,153 @@ class _SearchScreenState extends State<SearchScreen> {
                             physics: const BouncingScrollPhysics(),
                             children: [
                               // --- SONGS ---
-                              ...songResults.map((dynamic item) {
-                                final song = item as Map<String, dynamic>;
-                                final title = song['title']?.toString() ?? 'Unknown Song';
-                                final artist = song['artist_name']?.toString() ?? 'Unknown Artist';
-                                final imageUrl = (song['cover_image'] != null &&
-                                        song['cover_image'].toString().isNotEmpty)
-                                    ? ApiService.imageUrl(song['cover_image'].toString())
-                                    : '';
-
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      "/track_view",
-                                      arguments: song,
-                                    );
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Row(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(6),
-                                          child: imageUrl.isNotEmpty
-                                              ? Image.network(
-                                                  imageUrl,
-                                                  width: 55,
-                                                  height: 55,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (_, __, ___) => Image.asset(
-                                                    'assets/images/default.png',
-                                                    width: 55,
-                                                    height: 55,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                )
-                                              : Image.asset(
-                                                  'assets/images/default.png',
-                                                  width: 55,
-                                                  height: 55,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                        ),
-                                        const SizedBox(width: 14),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
-                                            children: [
-                                              Text(
-                                                title,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 17,
-                                                  fontWeight: FontWeight.w600,
-                                                ),
-                                              ),
-                                              const SizedBox(height: 4),
-                                              Text(
-                                                artist,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                                style: const TextStyle(
-                                                  color: Colors.white54,
-                                                  fontSize: 14,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
+                              for (var item in songResults)
+                                _buildSongItem(item as Map<String, dynamic>),
 
                               // --- ALBUMS ---
-                              ...albumResults.map((dynamic item) {
-                                final album = item as Map<String, dynamic>;
-                                final albumTitle = album['title']?.toString() ?? 'Unknown Album';
-                                final albumImage = (album['cover_image'] != null &&
-                                        album['cover_image'].toString().isNotEmpty)
-                                    ? ApiService.imageUrl(album['cover_image'].toString())
-                                    : '';
-
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      "/album_view",
-                                      arguments: album,
-                                    );
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 8),
-                                    child: Row(
-                                      children: [
-                                        ClipRRect(
-                                          borderRadius: BorderRadius.circular(6),
-                                          child: albumImage.isNotEmpty
-                                              ? Image.network(
-                                                  albumImage,
-                                                  width: 55,
-                                                  height: 55,
-                                                  fit: BoxFit.cover,
-                                                  errorBuilder: (_, __, ___) =>
-                                                      Image.asset(
-                                                    'assets/images/default.png',
-                                                    width: 55,
-                                                    height: 55,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                )
-                                              : Image.asset(
-                                                  'assets/images/default.png',
-                                                  width: 55,
-                                                  height: 55,
-                                                  fit: BoxFit.cover,
-                                                ),
-                                        ),
-                                        const SizedBox(width: 14),
-                                        Expanded(
-                                          child: Text(
-                                            albumTitle,
-                                            maxLines: 1,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 17,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              }).toList(),
+                              for (var item in albumResults)
+                                _buildAlbumItem(item as Map<String, dynamic>),
                             ],
                           ),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSongItem(Map<String, dynamic> song) {
+    final title = song['title']?.toString() ?? 'Unknown Song';
+    final artist = song['artist_name']?.toString() ?? 'Unknown Artist';
+    final imageUrl = (song['cover_image'] != null &&
+            song['cover_image'].toString().isNotEmpty)
+        ? ApiService.imageUrl(song['cover_image'].toString())
+        : '';
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          "/track_view",
+          arguments: song,
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: imageUrl.isNotEmpty
+                  ? Image.network(
+                      imageUrl,
+                      width: 55,
+                      height: 55,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Image.asset(
+                        'assets/images/default.png',
+                        width: 55,
+                        height: 55,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Image.asset(
+                      'assets/images/default.png',
+                      width: 55,
+                      height: 55,
+                      fit: BoxFit.cover,
+                    ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    artist,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAlbumItem(Map<String, dynamic> album) {
+    final albumTitle = album['title']?.toString() ?? 'Unknown Album';
+    final albumImage = (album['cover_image'] != null &&
+            album['cover_image'].toString().isNotEmpty)
+        ? ApiService.imageUrl(album['cover_image'].toString())
+        : '';
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          "/album_view",
+          arguments: album,
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: albumImage.isNotEmpty
+                  ? Image.network(
+                      albumImage,
+                      width: 55,
+                      height: 55,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Image.asset(
+                        'assets/images/default.png',
+                        width: 55,
+                        height: 55,
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  : Image.asset(
+                      'assets/images/default.png',
+                      width: 55,
+                      height: 55,
+                      fit: BoxFit.cover,
+                    ),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                albumTitle,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
