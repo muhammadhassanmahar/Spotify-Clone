@@ -71,8 +71,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: FutureBuilder<List<dynamic>>(
                 future: songsFuture,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState ==
-                      ConnectionState.waiting) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(
                       child: CircularProgressIndicator(
                         color: Colors.greenAccent,
@@ -106,6 +105,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, index) {
                       final song = songs[index];
 
+                      final coverImage = song['cover_image'] ?? "uploads/default.png";
+
                       return GestureDetector(
                         onTap: () {
                           Navigator.pushNamed(
@@ -129,10 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   borderRadius: BorderRadius.circular(8),
                                   image: DecorationImage(
                                     image: NetworkImage(
-                                      ApiService.imageUrl(
-                                        song['cover_image'] ??
-                                            "uploads/default.png",
-                                      ),
+                                      ApiService.imageUrl(coverImage),
                                     ),
                                     fit: BoxFit.cover,
                                   ),
@@ -140,8 +138,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(height: 5),
                               Padding(
-                                padding:
-                                    const EdgeInsets.symmetric(horizontal: 6),
+                                padding: const EdgeInsets.symmetric(horizontal: 6),
                                 child: Text(
                                   song['title'] ?? "Unknown",
                                   maxLines: 1,
@@ -188,14 +185,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: songs.length,
-                  gridDelegate:
-                      const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                   ),
                   itemBuilder: (context, index) {
                     final song = songs[index];
+
+                    final coverImage = song['cover_image'] ?? "uploads/default.png";
 
                     return GestureDetector(
                       onTap: () {
@@ -218,10 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 borderRadius: BorderRadius.circular(8),
                                 image: DecorationImage(
                                   image: NetworkImage(
-                                    ApiService.imageUrl(
-                                      song['cover_image'] ??
-                                          "uploads/default.png",
-                                    ),
+                                    ApiService.imageUrl(coverImage),
                                   ),
                                   fit: BoxFit.cover,
                                 ),
@@ -229,8 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 8),
                             Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 6),
+                              padding: const EdgeInsets.symmetric(horizontal: 6),
                               child: Text(
                                 song['title'] ?? "Unknown",
                                 maxLines: 1,
@@ -259,11 +253,15 @@ class _HomeScreenState extends State<HomeScreen> {
         unselectedItemColor: Colors.white54,
         currentIndex: selectedIndex,
         onTap: (index) {
+          setState(() {
+            selectedIndex = index;
+          });
+
           if (index == 1) {
             Navigator.pushNamed(context, "/search");
-            return;
+          } else if (index == 2) {
+            Navigator.pushNamed(context, "/library");
           }
-          setState(() => selectedIndex = index);
         },
         items: const [
           BottomNavigationBarItem(
