@@ -10,29 +10,40 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
-  List<dynamic> results = [];
+  List<dynamic> songResults = [];
+  List<dynamic> albumResults = [];
   bool isLoading = false;
 
   // 🔍 SEARCH FROM BACKEND
-  Future<void> searchSongs(String query) async {
+  Future<void> search(String query) async {
     if (query.trim().isEmpty) {
-      if (mounted) setState(() => results = []);
+      if (mounted) {
+        setState(() {
+          songResults = [];
+          albumResults = [];
+        });
+      }
       return;
     }
 
     if (mounted) setState(() => isLoading = true);
 
     try {
-      final List<dynamic> data = await ApiService.searchSongs(query);
+      final List<dynamic> songs = await ApiService.searchSongs(query);
+      final List<dynamic> albums = await ApiService.searchAlbums(query);
 
       if (mounted) {
         setState(() {
-          results = data;
+          songResults = songs;
+          albumResults = albums;
         });
       }
     } catch (e) {
       debugPrint("Search error: $e");
-      if (mounted) setState(() => results = []);
+      if (mounted) setState(() {
+        songResults = [];
+        albumResults = [];
+      });
     } finally {
       if (mounted) setState(() => isLoading = false);
     }
@@ -70,10 +81,9 @@ class _SearchScreenState extends State<SearchScreen> {
                       child: TextField(
                         controller: _searchController,
                         style: const TextStyle(color: Colors.white),
-                        onChanged: searchSongs,
+                        onChanged: search,
                         decoration: const InputDecoration(
-                          prefixIcon:
-                              Icon(Icons.search, color: Colors.white54),
+                          prefixIcon: Icon(Icons.search, color: Colors.white54),
                           hintText: 'Search',
                           hintStyle: TextStyle(color: Colors.white54),
                           border: InputBorder.none,
@@ -86,8 +96,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     onTap: () => Navigator.pop(context),
                     child: const Text(
                       'Cancel',
-                      style:
-                          TextStyle(color: Colors.white70, fontSize: 16),
+                      style: TextStyle(color: Colors.white70, fontSize: 16),
                     ),
                   )
                 ],
@@ -114,7 +123,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           color: Colors.green,
                         ),
                       )
-                    : results.isEmpty
+                    : (songResults.isEmpty && albumResults.isEmpty)
                         ? const Center(
                             child: Text(
                               'No results found',
@@ -124,107 +133,150 @@ class _SearchScreenState extends State<SearchScreen> {
                               ),
                             ),
                           )
-                        : ListView.builder(
+                        : ListView(
                             physics: const BouncingScrollPhysics(),
-                            itemCount: results.length,
-                            itemBuilder: (context, index) {
-                              final Map<String, dynamic> song =
-                                  results[index] as Map<String, dynamic>;
+                            children: [
+                              // --- SONGS ---
+                              ...songResults.map((dynamic item) {
+                                final song = item as Map<String, dynamic>;
+                                final title = song['title']?.toString() ?? 'Unknown Song';
+                                final artist = song['artist_name']?.toString() ?? 'Unknown Artist';
+                                final imageUrl = (song['cover_image'] != null &&
+                                        song['cover_image'].toString().isNotEmpty)
+                                    ? ApiService.imageUrl(song['cover_image'].toString())
+                                    : '';
 
-                              final String title =
-                                  song['title']?.toString() ??
-                                      'Unknown Song';
-
-                              final String artist =
-                                  song['artist_name']?.toString() ??
-                                      'Unknown Artist';
-
-                              // 🖼 COVER IMAGE
-                              final String imageUrl =
-                                  (song['cover_image'] != null &&
-                                          song['cover_image']
-                                              .toString()
-                                              .isNotEmpty)
-                                      ? ApiService.imageUrl(
-                                          song['cover_image'].toString())
-                                      : '';
-
-                              return GestureDetector(
-                                onTap: () {
-                                  // ✅ ONLY SELECTED SONG PASS
-                                  Navigator.pushNamed(
-                                    context,
-                                    "/track_view",
-                                    arguments: song,
-                                  );
-                                },
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 8),
-                                  child: Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius:
-                                            BorderRadius.circular(6),
-                                        child: imageUrl.isNotEmpty
-                                            ? Image.network(
-                                                imageUrl,
-                                                width: 55,
-                                                height: 55,
-                                                fit: BoxFit.cover,
-                                                errorBuilder:
-                                                    (_, __, ___) =>
-                                                        Image.asset(
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      "/track_view",
+                                      arguments: song,
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(6),
+                                          child: imageUrl.isNotEmpty
+                                              ? Image.network(
+                                                  imageUrl,
+                                                  width: 55,
+                                                  height: 55,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) => Image.asset(
+                                                    'assets/images/default.png',
+                                                    width: 55,
+                                                    height: 55,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                )
+                                              : Image.asset(
                                                   'assets/images/default.png',
                                                   width: 55,
                                                   height: 55,
                                                   fit: BoxFit.cover,
                                                 ),
-                                              )
-                                            : Image.asset(
-                                                'assets/images/default.png',
-                                                width: 55,
-                                                height: 55,
-                                                fit: BoxFit.cover,
-                                              ),
-                                      ),
-                                      const SizedBox(width: 14),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              title,
-                                              maxLines: 1,
-                                              overflow:
-                                                  TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 17,
-                                                fontWeight:
-                                                    FontWeight.w600,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              artist,
-                                              maxLines: 1,
-                                              overflow:
-                                                  TextOverflow.ellipsis,
-                                              style: const TextStyle(
-                                                color: Colors.white54,
-                                                fontSize: 14,
-                                              ),
-                                            ),
-                                          ],
                                         ),
-                                      ),
-                                    ],
+                                        const SizedBox(width: 14),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                title,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 17,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 4),
+                                              Text(
+                                                artist,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  color: Colors.white54,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
+                                );
+                              }).toList(),
+
+                              // --- ALBUMS ---
+                              ...albumResults.map((dynamic item) {
+                                final album = item as Map<String, dynamic>;
+                                final albumTitle = album['title']?.toString() ?? 'Unknown Album';
+                                final albumImage = (album['cover_image'] != null &&
+                                        album['cover_image'].toString().isNotEmpty)
+                                    ? ApiService.imageUrl(album['cover_image'].toString())
+                                    : '';
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      "/album_view",
+                                      arguments: album,
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 8),
+                                    child: Row(
+                                      children: [
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(6),
+                                          child: albumImage.isNotEmpty
+                                              ? Image.network(
+                                                  albumImage,
+                                                  width: 55,
+                                                  height: 55,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (_, __, ___) =>
+                                                      Image.asset(
+                                                    'assets/images/default.png',
+                                                    width: 55,
+                                                    height: 55,
+                                                    fit: BoxFit.cover,
+                                                  ),
+                                                )
+                                              : Image.asset(
+                                                  'assets/images/default.png',
+                                                  width: 55,
+                                                  height: 55,
+                                                  fit: BoxFit.cover,
+                                                ),
+                                        ),
+                                        const SizedBox(width: 14),
+                                        Expanded(
+                                          child: Text(
+                                            albumTitle,
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: const TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 17,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                            ],
                           ),
               ),
             ],
