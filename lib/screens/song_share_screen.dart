@@ -1,18 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../services/api_service.dart';
 
 class SongShareScreen extends StatelessWidget {
   const SongShareScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // ---------------- GET ARGUMENTS ----------------
-    final args = ModalRoute.of(context)!.settings.arguments as Map<String, String>?;
+    final song =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
-    // Default values agar arguments nahi mile
-    final String title = args?['title'] ?? "Unknown Song";
-    final String artist = args?['artist'] ?? "Unknown Artist";
-    final String image = args?['image'] ??
-        "https://i.scdn.co/image/ab67616d00001e0208dd3f0bcb7b4f31f27e5f1e";
+    if (song == null) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Text('Song not found',
+              style: TextStyle(color: Colors.white)),
+        ),
+      );
+    }
+
+    final title = song['title'] ?? 'Unknown Song';
+    final artist = song['artist_name'] ?? 'Unknown Artist';
+
+    final coverPath = song['cover_image']?.toString() ?? '';
+    final imageUrl =
+        coverPath.isNotEmpty ? ApiService.imageUrl(coverPath) : null;
+
+    // 🔗 SONG LINK (example)
+    final songLink =
+        "https://yourapp.com/song/${song['id'] ?? ''}";
 
     final height = MediaQuery.of(context).size.height;
 
@@ -20,24 +38,22 @@ class SongShareScreen extends StatelessWidget {
       backgroundColor: Colors.black,
       body: Column(
         children: [
-          // Close + Title
           Padding(
-            padding: EdgeInsets.only(top: height * 0.06, left: 20, right: 20),
+            padding: EdgeInsets.only(
+                top: height * 0.06, left: 20, right: 20),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 GestureDetector(
                   onTap: () => Navigator.pop(context),
-                  child: const Icon(Icons.close, color: Colors.white, size: 28),
+                  child:
+                      const Icon(Icons.close, color: Colors.white),
                 ),
-                const Text(
-                  "Share",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
+                const Text("Share",
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w600)),
                 const SizedBox(width: 30),
               ],
             ),
@@ -45,14 +61,16 @@ class SongShareScreen extends StatelessWidget {
 
           SizedBox(height: height * 0.05),
 
-          // Album Art
           Container(
             height: height * 0.28,
             width: height * 0.28,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               image: DecorationImage(
-                image: NetworkImage(image), // AssetImage -> NetworkImage
+                image: imageUrl != null
+                    ? NetworkImage(imageUrl)
+                    : const AssetImage('assets/images/default.png')
+                        as ImageProvider,
                 fit: BoxFit.cover,
               ),
             ),
@@ -60,49 +78,40 @@ class SongShareScreen extends StatelessWidget {
 
           SizedBox(height: height * 0.03),
 
-          // Song title
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 22,
-              height: 1.3,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
+          Text(title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold)),
 
-          // Artist
-          Text(
-            artist,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Colors.grey,
-            ),
-          ),
+          Text(artist,
+              style:
+                  const TextStyle(color: Colors.grey, fontSize: 16)),
 
           SizedBox(height: height * 0.05),
 
-          // Share Icons Row
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: Wrap(
-              alignment: WrapAlignment.center,
-              spacing: 30,
-              runSpacing: 25,
-              children: [
-                _shareButton(Icons.link, "Copy Link"),
-                _shareButton(Icons.share, "WhatsApp"),
-                _shareButton(Icons.alternate_email, "Twitter"),
-                _shareButton(Icons.message, "Messages"),
-                _shareButton(Icons.more_horiz, "More"),
-              ],
-            ),
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 30,
+            runSpacing: 25,
+            children: [
+              _btn(Icons.link, "Copy Link",
+                  () => Share.share(songLink)),
+              _btn(Icons.share, "WhatsApp",
+                  () => _open("https://wa.me/?text=$songLink")),
+              _btn(Icons.alternate_email, "Twitter",
+                  () => _open(
+                      "https://twitter.com/intent/tweet?text=$songLink")),
+              _btn(Icons.message, "Messages",
+                  () => Share.share(songLink)),
+              _btn(Icons.more_horiz, "More",
+                  () => Share.share(songLink)),
+            ],
           ),
 
           const Spacer(),
 
-          // Bottom Drag Bar
           Padding(
             padding: const EdgeInsets.only(bottom: 18),
             child: Container(
@@ -119,24 +128,32 @@ class SongShareScreen extends StatelessWidget {
     );
   }
 
-  Widget _shareButton(IconData icon, String label) {
+  Widget _btn(IconData icon, String label, VoidCallback onTap) {
     return Column(
       children: [
-        Container(
-          height: 56,
-          width: 56,
-          decoration: const BoxDecoration(
-            color: Color(0xFF2C2C2C),
-            shape: BoxShape.circle,
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 56,
+            width: 56,
+            decoration: const BoxDecoration(
+              color: Color(0xFF2C2C2C),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: Colors.white),
           ),
-          child: Icon(icon, color: Colors.white, size: 28),
         ),
         const SizedBox(height: 6),
-        Text(
-          label,
-          style: const TextStyle(color: Colors.white, fontSize: 13),
-        ),
+        Text(label,
+            style: const TextStyle(color: Colors.white, fontSize: 13)),
       ],
     );
+  }
+
+  static Future<void> _open(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 }

@@ -12,17 +12,31 @@ class TrackScreen extends StatelessWidget {
     final song =
         ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
 
+    // 🛑 SAFETY CHECK
+    if (song == null) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Text(
+            'Song not found',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+
+    // 🎵 SONG DETAILS
     final String title =
-        song?['title']?.toString().isNotEmpty == true
-            ? song!['title']
+        song['title']?.toString().isNotEmpty == true
+            ? song['title']
             : 'Unknown Song';
 
     final String artist =
-        song?['artist_name']?.toString().isNotEmpty == true
-            ? song!['artist_name']
+        song['artist_name']?.toString().isNotEmpty == true
+            ? song['artist_name']
             : 'Unknown Artist';
 
-    final String coverPath = song?['cover_image']?.toString() ?? '';
+    final String coverPath = song['cover_image']?.toString() ?? '';
 
     final String? coverImage =
         coverPath.isNotEmpty ? ApiService.imageUrl(coverPath) : null;
@@ -89,7 +103,7 @@ class TrackScreen extends StatelessWidget {
                   _option(Icons.playlist_add, 'Add to playlist'),
                   _option(Icons.queue_music, 'Add to queue'),
 
-                  // 🔗 SHARE (SAME SONG DATA)
+                  // 🔗 SHARE → SongShareScreen
                   ListTile(
                     leading:
                         const Icon(Icons.share, color: Colors.white70),
@@ -100,8 +114,8 @@ class TrackScreen extends StatelessWidget {
                     onTap: () {
                       Navigator.pushNamed(
                         context,
-                        '/song_share',
-                        arguments: song, // 🔥 SAME SONG
+                        '/song_share', // ✅ ROUTE NAME CHECKED
+                        arguments: song, // 🔥 FULL SONG OBJECT
                       );
                     },
                   ),
@@ -121,8 +135,10 @@ class TrackScreen extends StatelessWidget {
               onTap: () => Navigator.pop(context),
               child: const Text(
                 'Close',
-                style:
-                    TextStyle(color: Colors.white70, fontSize: 16),
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                ),
               ),
             ),
 
