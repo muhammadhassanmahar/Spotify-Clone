@@ -47,7 +47,7 @@ class ApiService {
   }
 
   // ------------------------------------
-  // 🔍 SEARCH SONGS (FIXED)
+  // 🔍 SEARCH SONGS
   // ------------------------------------
   static Future<List<dynamic>> searchSongs(String query) async {
     if (query.trim().isEmpty) return [];
@@ -64,6 +64,50 @@ class ApiService {
       }
     } catch (e) {
       debugPrint("❌ searchSongs error: $e");
+    }
+
+    return [];
+  }
+
+  // ------------------------------------
+  // 🔍 SEARCH ALBUMS
+  // ------------------------------------
+  static Future<List<dynamic>> searchAlbums(String query) async {
+    if (query.trim().isEmpty) return [];
+
+    try {
+      final encodedQuery = Uri.encodeQueryComponent(query);
+      final url = Uri.parse("$baseUrl/search/albums?query=$encodedQuery");
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return _safeList(decoded);
+      }
+    } catch (e) {
+      debugPrint("❌ searchAlbums error: $e");
+    }
+
+    return [];
+  }
+
+  // ------------------------------------
+  // 🎵 GET ALBUM SONGS
+  // ------------------------------------
+  static Future<List<dynamic>> getAlbumSongs(String albumId) async {
+    if (albumId.trim().isEmpty) return [];
+
+    try {
+      final url = Uri.parse("$baseUrl/albums/$albumId/songs");
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+        return _safeList(decoded);
+      }
+    } catch (e) {
+      debugPrint("❌ getAlbumSongs error: $e");
     }
 
     return [];
