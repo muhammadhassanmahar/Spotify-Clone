@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import '../services/player_service.dart'; // ya state provider jahan currentUser & currentSong track ho
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final currentUser = PlayerService.currentUser; // account info
+    final currentSong = PlayerService.currentSong; // currently playing song
+
     return Scaffold(
       backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
@@ -23,7 +27,7 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         children: [
           const SizedBox(height: 16),
-          _ProfileSection(),
+          _ProfileSection(username: currentUser?.name ?? "User"),
           const SizedBox(height: 16),
           _settingsTile('Account'),
           _settingsTile('Data Saver'),
@@ -39,7 +43,7 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 32),
         ],
       ),
-      bottomNavigationBar: _BottomNowPlaying(),
+      bottomNavigationBar: currentSong != null ? _BottomNowPlaying(song: currentSong) : null,
     );
   }
 
@@ -54,14 +58,15 @@ class SettingsScreen extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right, color: Colors.white70),
           onTap: () {},
         ),
-        Divider(color: Colors.white12, height: 1),
+        const Divider(color: Colors.white12, height: 1),
       ],
     );
   }
 }
 
 class _ProfileSection extends StatelessWidget {
-  const _ProfileSection();
+  final String username;
+  const _ProfileSection({required this.username});
 
   @override
   Widget build(BuildContext context) {
@@ -70,9 +75,9 @@ class _ProfileSection extends StatelessWidget {
         radius: 26,
         backgroundImage: AssetImage('assets/profile.png'),
       ),
-      title: const Text(
-        'maya',
-        style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+      title: Text(
+        username,
+        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
       ),
       subtitle: const Text(
         'View Profile',
@@ -85,6 +90,9 @@ class _ProfileSection extends StatelessWidget {
 }
 
 class _BottomNowPlaying extends StatelessWidget {
+  final dynamic song;
+  const _BottomNowPlaying({required this.song});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -96,12 +104,13 @@ class _BottomNowPlaying extends StatelessWidget {
             width: 44,
             height: 44,
             color: Colors.grey,
+            child: song['cover'] != null ? Image.network(song['cover'], fit: BoxFit.cover) : null,
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Easy • Troye Sivan',
-              style: TextStyle(color: Colors.white, fontSize: 14),
+              '${song['title']} • ${song['artist']}',
+              style: const TextStyle(color: Colors.white, fontSize: 14),
               overflow: TextOverflow.ellipsis,
             ),
           ),
