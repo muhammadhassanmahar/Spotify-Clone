@@ -97,16 +97,16 @@ class SongShareScreen extends StatelessWidget {
             runSpacing: 25,
             children: [
               _btn(Icons.link, "Copy Link",
-                  () => Share.share(songLink)),
+                  () => SharePlus.instance.share(songLink)),
               _btn(Icons.share, "WhatsApp",
                   () => _open("https://wa.me/?text=$songLink")),
               _btn(Icons.alternate_email, "Twitter",
                   () => _open(
                       "https://twitter.com/intent/tweet?text=$songLink")),
               _btn(Icons.message, "Messages",
-                  () => Share.share(songLink)),
+                  () => SharePlus.instance.share(songLink)),
               _btn(Icons.more_horiz, "More",
-                  () => Share.share(songLink)),
+                  () => SharePlus.instance.share(songLink)),
             ],
           ),
 
