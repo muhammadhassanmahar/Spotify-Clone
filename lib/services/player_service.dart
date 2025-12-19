@@ -5,8 +5,14 @@ class User {
   final String id;
   final String name;
   final String email;
+  final String? imageUrl; // ✅ added imageUrl
 
-  User({required this.id, required this.name, required this.email});
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+    this.imageUrl, // optional
+  });
 
   // Factory method to create user from JSON
   factory User.fromJson(Map<String, dynamic> json) {
@@ -14,6 +20,7 @@ class User {
       id: json['id'] ?? '',
       name: json['name'] ?? 'User',
       email: json['email'] ?? '',
+      imageUrl: json['image'] ?? null, // ✅ set from backend field
     );
   }
 }
@@ -65,7 +72,6 @@ class PlayerService extends ChangeNotifier {
 
   // Pause song
   void pauseSong() {
-    // You can add actual audio control later
     currentSong = null;
     notifyListeners();
   }

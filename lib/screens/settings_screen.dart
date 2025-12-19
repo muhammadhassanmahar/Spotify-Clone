@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/player_service.dart'; // ya state provider jahan currentUser & currentSong track ho
+import '../services/player_service.dart'; // jahan currentUser & currentSong track ho
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -27,7 +27,10 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         children: [
           const SizedBox(height: 16),
-          _ProfileSection(username: currentUser?.name ?? "User"),
+          _ProfileSection(
+            username: currentUser?.name ?? "User",
+            profileImage: currentUser?.imageUrl, // account pic
+          ),
           const SizedBox(height: 16),
           _settingsTile('Account'),
           _settingsTile('Data Saver'),
@@ -66,14 +69,16 @@ class SettingsScreen extends StatelessWidget {
 
 class _ProfileSection extends StatelessWidget {
   final String username;
-  const _ProfileSection({required this.username});
+  final String? profileImage;
+  const _ProfileSection({required this.username, this.profileImage});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: const CircleAvatar(
+      leading: CircleAvatar(
         radius: 26,
-        backgroundImage: AssetImage('assets/profile.png'),
+        backgroundColor: Colors.black,
+        backgroundImage: profileImage != null ? NetworkImage(profileImage!) : null,
       ),
       title: Text(
         username,
