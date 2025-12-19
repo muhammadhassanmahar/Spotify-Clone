@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart'; // backend service
+import '../services/api_service.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -19,8 +19,8 @@ class _LibraryScreenState extends State<LibraryScreen> {
   @override
   void initState() {
     super.initState();
-    likedSongsFuture = ApiService.getLikedSongs(); // backend fetch
-    artistsFuture = ApiService.getSelectedArtists(); // backend fetch
+    likedSongsFuture = ApiService.getLikedSongs();
+    artistsFuture = ApiService.getSelectedArtists();
   }
 
   @override
@@ -57,14 +57,16 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/settings'); // Settings screen
+                    },
                     icon: const Icon(Icons.add, color: Colors.white),
                   ),
                 ],
               ),
             ),
 
-            // Chips (Playlists, Artists, Albums, Podcasts & shows)
+            // Chips
             SizedBox(
               height: 48,
               child: ListView(
