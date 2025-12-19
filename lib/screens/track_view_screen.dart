@@ -55,7 +55,7 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Bar
+            // 🔝 TOP BAR
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: Row(
@@ -63,10 +63,14 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
                 children: [
                   const BackButton(color: Colors.white),
 
-                  // 🔥 ONLY CHANGE: navigation added here
+                  // ✅ FIX: SAME SONG PASS TO TRACK SCREEN
                   GestureDetector(
                     onTap: () {
-                      Navigator.pushNamed(context, '/track_screen');
+                      Navigator.pushNamed(
+                        context,
+                        '/track_screen',
+                        arguments: song, // 🔥 SAME SONG
+                      );
                     },
                     child: const Icon(
                       Icons.more_horiz,
@@ -77,7 +81,7 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
               ),
             ),
 
-            // Album Art
+            // 🖼 ALBUM ART
             Padding(
               padding: const EdgeInsets.all(18.0),
               child: AspectRatio(
@@ -95,7 +99,7 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
               ),
             ),
 
-            // Track Info
+            // 🎶 TRACK INFO
             Text(
               title,
               style: const TextStyle(
@@ -113,7 +117,7 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
               style: const TextStyle(color: Colors.white70, fontSize: 14),
             ),
 
-            // Progress Bar
+            // ⏳ PROGRESS BAR
             StreamBuilder<Duration>(
               stream: _player.positionStream,
               builder: (context, snapshot) {
@@ -139,11 +143,13 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
                         children: [
                           Text(
                             _formatTime(position),
-                            style: const TextStyle(color: Colors.white70),
+                            style:
+                                const TextStyle(color: Colors.white70),
                           ),
                           Text(
                             "-${_formatTime(duration - position)}",
-                            style: const TextStyle(color: Colors.white70),
+                            style:
+                                const TextStyle(color: Colors.white70),
                           )
                         ],
                       )
@@ -153,7 +159,7 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
               },
             ),
 
-            // Controls
+            // ▶️ CONTROLS
             Padding(
               padding:
                   const EdgeInsets.symmetric(horizontal: 32, vertical: 10),
@@ -198,14 +204,16 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
 
             const Spacer(),
 
-            // Lyrics Button
+            // 🎤 LYRICS
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(color: Color(0xFFDA6A2A)),
+              decoration:
+                  const BoxDecoration(color: Color(0xFFDA6A2A)),
               child: const Text(
                 'Lyrics',
-                style: TextStyle(color: Colors.white, fontSize: 18),
+                style:
+                    TextStyle(color: Colors.white, fontSize: 18),
                 textAlign: TextAlign.center,
               ),
             )
@@ -219,7 +227,8 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
     return Container(
       color: Colors.black26,
       child: const Center(
-        child: Icon(Icons.music_note, color: Colors.white, size: 40),
+        child: Icon(Icons.music_note,
+            color: Colors.white, size: 40),
       ),
     );
   }
@@ -228,7 +237,8 @@ class _TrackViewScreenState extends State<TrackViewScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: Center(
-        child: Text(msg, style: const TextStyle(color: Colors.white)),
+        child: Text(msg,
+            style: const TextStyle(color: Colors.white)),
       ),
     );
   }
