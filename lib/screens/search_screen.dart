@@ -23,8 +23,7 @@ class _SearchScreenState extends State<SearchScreen> {
     if (mounted) setState(() => isLoading = true);
 
     try {
-      final List<dynamic> data =
-          await ApiService.searchSongs(query);
+      final List<dynamic> data = await ApiService.searchSongs(query);
 
       if (mounted) {
         setState(() {
@@ -140,7 +139,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                   song['artist_name']?.toString() ??
                                       'Unknown Artist';
 
-                              // ✅ SAFE IMAGE URL (IMPORTANT FIX)
+                              // 🖼 COVER IMAGE
                               final String imageUrl =
                                   (song['cover_image'] != null &&
                                           song['cover_image']
@@ -152,11 +151,11 @@ class _SearchScreenState extends State<SearchScreen> {
 
                               return GestureDetector(
                                 onTap: () {
-                                  // 🔥 FIXED: Full song object pass kar rahe
+                                  // ✅ ONLY SELECTED SONG PASS
                                   Navigator.pushNamed(
                                     context,
                                     "/track_view",
-                                    arguments: song, // ✅ FULL SONG
+                                    arguments: song,
                                   );
                                 },
                                 child: Padding(
