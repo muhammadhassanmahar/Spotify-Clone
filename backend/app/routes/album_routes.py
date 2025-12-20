@@ -1,57 +1,78 @@
 from fastapi import APIRouter, HTTPException
 from bson import ObjectId
+
 from app.database.collection import albums_collection, songs_collection
+from app.controllers.song_controller import enrich_song
 
-router = APIRouter(prefix="/albums", tags=["Albums"])
-
+router = APIRouter(
+    prefix="/albums",
+    tags=["Albums"]
+)
 
 # -------------------------------------------------
 # ✅ TEST ROUTE
 # -------------------------------------------------
 @router.get("/test")
-def test_album():
+async def test_album():
     return {"message": "Album route working!"}
 
 
 # -------------------------------------------------
 # 📀 GET ALL ALBUMS
 # -------------------------------------------------
-@router.get("/")
+@router.get("")
 async def get_all_albums():
     albums = []
 
     async for album in albums_collection.find():
-        album["_id"] = str(album["_id"])
-        albums.append(album)
+        albums.append({
+            "id": str(album["_id"]),
+            "title": album.get("title", ""),
+            "cover_image": album.get("cover_image", ""),
+            "artist_id": str(album["artist_id"])
+            if album.get("artist_id") else None,
+            "year": album.get("year"),
+        })
 
     return albums
 
 
 # -------------------------------------------------
-# 📀 GET SINGLE ALBUM + SONGS
+# 📀 GET SINGLE ALBUM + SONGS (🔥 FIXED)
 # -------------------------------------------------
 @router.get("/{album_id}")
 async def get_album_with_songs(album_id: str):
-    try:
-        album = await albums_collection.find_one(
-            {"_id": ObjectId(album_id)}
-        )
-        if not album:
-            raise HTTPException(status_code=404, detail="Album not found")
-
-        album["_id"] = str(album["_id"])
-
-        songs = []
-        async for song in songs_collection.find(
-            {"album_id": ObjectId(album_id)}
-        ):
-            song["_id"] = str(song["_id"])
-            song["album_id"] = str(song["album_id"])
-            songs.append(song)
-
-        album["songs"] = songs
-
-        return album
-
-    except Exception:
+    if not ObjectId.is_valid(album_id):
         raise HTTPException(status_code=400, detail="Invalid album id")
+
+    album = await albums_collection.find_one(
+        {"_id": ObjectId(album_id)}
+    )
+
+    if not album:
+        raise HTTPException(status_code=404, detail="Album not found")
+
+    # -------------------------
+    # Album base
+    # -------------------------
+    response = {
+        "id": str(album["_id"]),
+        "title": album.get("title", ""),
+        "cover_image": album.get("cover_image", ""),
+        "artist_id": str(album["artist_id"])
+        if album.get("artist_id") else None,
+        "year": album.get("year"),
+        "songs": [],
+    }
+
+    # -------------------------
+    # Songs of album
+    # -------------------------
+    async for song in songs_collection.find(
+        {"album_id": ObjectId(album_id)}
+    ):
+        response["songs"].append(
+            await enrich_song(song)   # ✅ SAME FORMAT AS /songs
+        )
+
+    return response
