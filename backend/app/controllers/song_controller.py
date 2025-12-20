@@ -9,49 +9,75 @@ from app.database import (
 from app.schemas.song_schema import SongCreateSchema, SongUpdateSchema
 
 
-# ----------------------------------------
-# HELPER: attach artist / album names
-# ----------------------------------------
+# -------------------------------------------------
+# 🔧 HELPER: ObjectId safe convert
+# -------------------------------------------------
+def to_object_id(value):
+    if value and ObjectId.is_valid(str(value)):
+        return ObjectId(str(value))
+    return None
+
+
+# -------------------------------------------------
+# 🔧 HELPER: ENRICH SONG
+# -------------------------------------------------
 async def enrich_song(song: dict):
-    # Artist name
+    # -------------------------
+    # Artist
+    # -------------------------
     artist_name = "Unknown Artist"
-    if song.get("artist_id") and ObjectId.is_valid(song["artist_id"]):
-        artist = await artists_collection.find_one(
-            {"_id": ObjectId(song["artist_id"])}
-        )
+    artist_id = to_object_id(song.get("artist_id"))
+
+    if artist_id:
+        artist = await artists_collection.find_one({"_id": artist_id})
         if artist:
             artist_name = artist.get("name", artist_name)
 
-    # Album name (optional)
+    # -------------------------
+    # Album
+    # -------------------------
     album_name = None
-    if song.get("album_id") and ObjectId.is_valid(song["album_id"]):
-        album = await albums_collection.find_one(
-            {"_id": ObjectId(song["album_id"])}
-        )
+    album_id = to_object_id(song.get("album_id"))
+
+    if album_id:
+        album = await albums_collection.find_one({"_id": album_id})
         if album:
             album_name = album.get("title")
 
-    # 🔥 IMPORTANT: AUDIO FIELD FIX
-    # MongoDB me 'audio' ya 'audio_url' jo bhi ho, Flutter ko 'audio_url' milega
-    audio_path = song.get("audio") or song.get("audio_url")
+    # -------------------------
+    # Audio path (🔥 CRITICAL FIX)
+    # -------------------------
+    audio_url = (
+        song.get("audio_url")
+        or song.get("audio")
+        or ""
+    )
 
-    song["id"] = str(song["_id"])
-    song["artist_name"] = artist_name
-    song["album_name"] = album_name
-    song["audio_url"] = audio_path  # ✅ Flutter expects this
+    # -------------------------
+    # Cover image
+    # -------------------------
+    cover_image = song.get("cover_image") or ""
 
-    # Optional: agar cover image hai
-    if song.get("cover_image"):
-        song["cover_image"] = song.get("cover_image")
+    # -------------------------
+    # Final response
+    # -------------------------
+    return {
+        "id": str(song["_id"]),
+        "title": song.get("title", "Unknown Song"),
+        "artist_id": str(artist_id) if artist_id else None,
+        "album_id": str(album_id) if album_id else None,
+        "artist_name": artist_name,
+        "album_name": album_name,
+        "duration": song.get("duration", 0),
+        "audio_url": audio_url,          # ✅ Flutter expects this
+        "cover_image": cover_image,       # ✅ empty allowed
+        "genre_id": song.get("genre_id"),
+    }
 
-    del song["_id"]
 
-    return song
-
-
-# ----------------------------------------
-# CREATE SONG
-# ----------------------------------------
+# -------------------------------------------------
+# ➕ CREATE SONG
+# -------------------------------------------------
 async def create_song(data: SongCreateSchema):
     song_dict = data.dict()
     result = await songs_collection.insert_one(song_dict)
@@ -63,9 +89,9 @@ async def create_song(data: SongCreateSchema):
     return await enrich_song(song)
 
 
-# ----------------------------------------
-# GET SONG BY ID
-# ----------------------------------------
+# -------------------------------------------------
+# 🎵 GET SONG BY ID
+# -------------------------------------------------
 async def get_song_by_id(song_id: str):
     if not ObjectId.is_valid(song_id):
         raise HTTPException(status_code=400, detail="Invalid song ID")
@@ -77,9 +103,9 @@ async def get_song_by_id(song_id: str):
     return await enrich_song(song)
 
 
-# ----------------------------------------
-# GET ALL SONGS
-# ----------------------------------------
+# -------------------------------------------------
+# 🎵 GET ALL SONGS
+# -------------------------------------------------
 async def get_all_songs():
     songs = []
     async for song in songs_collection.find():
@@ -87,18 +113,21 @@ async def get_all_songs():
     return songs
 
 
-# ----------------------------------------
-# UPDATE SONG
-# ----------------------------------------
+# -------------------------------------------------
+# ✏️ UPDATE SONG
+# -------------------------------------------------
 async def update_song(song_id: str, data: SongUpdateSchema):
     if not ObjectId.is_valid(song_id):
         raise HTTPException(status_code=400, detail="Invalid song ID")
 
-    update_data = {k: v for k, v in data.dict().items() if v is not None}
+    update_data = {
+        k: v for k, v in data.dict().items()
+        if v is not None
+    }
 
     result = await songs_collection.update_one(
         {"_id": ObjectId(song_id)},
-        {"$set": update_data},
+        {"$set": update_data}
     )
 
     if result.matched_count == 0:
@@ -108,14 +137,16 @@ async def update_song(song_id: str, data: SongUpdateSchema):
     return await enrich_song(song)
 
 
-# ----------------------------------------
-# DELETE SONG
-# ----------------------------------------
+# -------------------------------------------------
+# 🗑️ DELETE SONG
+# -------------------------------------------------
 async def delete_song(song_id: str):
     if not ObjectId.is_valid(song_id):
         raise HTTPException(status_code=400, detail="Invalid song ID")
 
-    result = await songs_collection.delete_one({"_id": ObjectId(song_id)})
+    result = await songs_collection.delete_one(
+        {"_id": ObjectId(song_id)}
+    )
 
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Song not found")
