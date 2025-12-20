@@ -1,6 +1,5 @@
 import os
 import urllib.parse
-from bson import ObjectId
 from app.database.collection import artists_collection, songs_collection, albums_collection
 
 # -------------------------------------------------
@@ -15,7 +14,50 @@ SUPPORTED_IMAGES = (".jpg", ".jpeg", ".png", ".webp")
 
 
 # -------------------------------------------------
-# 🔁 AUTO SCAN ARTISTS
+# 🧠 HELPERS
+# -------------------------------------------------
+def detect_artist_from_title(title: str) -> str:
+    if "-" in title:
+        return title.split("-")[0].strip()
+    if "_" in title:
+        return title.split("_")[0].strip()
+    return "Unknown Artist"
+
+
+async def get_or_create_artist(name: str):
+    artist = await artists_collection.find_one({"name": name})
+    if artist:
+        return artist["_id"]
+
+    result = await artists_collection.insert_one({
+        "name": name,
+        "image": "",
+        "bio": "",
+    })
+    print(f"👤 Artist added: {name}")
+    return result.inserted_id
+
+
+async def get_or_create_album(title: str, artist_id):
+    album = await albums_collection.find_one({
+        "title": title,
+        "artist_id": artist_id
+    })
+    if album:
+        return album["_id"]
+
+    result = await albums_collection.insert_one({
+        "title": title,
+        "cover_image": "",
+        "artist_id": artist_id,
+        "year": None,
+    })
+    print(f"📀 Album added: {title}")
+    return result.inserted_id
+
+
+# -------------------------------------------------
+# 🔁 AUTO SCAN ARTISTS (IMAGES)
 # -------------------------------------------------
 async def auto_scan_artists():
     if artists_collection is None:
@@ -27,122 +69,108 @@ async def auto_scan_artists():
         return
 
     for item in os.listdir(ARTISTS_DIR):
-        artist_path = os.path.join(ARTISTS_DIR, item)
+        path = os.path.join(ARTISTS_DIR, item)
 
-        # If item is a file
-        if os.path.isfile(artist_path) and item.lower().endswith(SUPPORTED_IMAGES):
-            artist_name = os.path.splitext(item)[0]
-            image_path = f"uploads/artists/{urllib.parse.quote(item)}"
-
-        # If item is a folder
-        elif os.path.isdir(artist_path):
-            artist_name = item
-            image_path = None
-            for root, dirs, files in os.walk(artist_path):
-                for file in files:
-                    if file.lower().endswith(SUPPORTED_IMAGES):
-                        rel_path = os.path.relpath(os.path.join(root, file), ".")
-                        image_path = urllib.parse.quote(rel_path.replace("\\", "/"))
-                        break
-                if image_path:
-                    break
-            if not image_path:
-                image_path = ""
-
-        else:
+        if not item.lower().endswith(SUPPORTED_IMAGES):
             continue
+
+        artist_name = os.path.splitext(item)[0]
+        image_path = f"uploads/artists/{urllib.parse.quote(item)}"
 
         existing = await artists_collection.find_one({"name": artist_name})
         if existing:
             continue
 
-        artist_doc = {
+        await artists_collection.insert_one({
             "name": artist_name,
             "image": image_path,
             "bio": "",
-        }
+        })
 
-        await artists_collection.insert_one(artist_doc)
-        print(f"✅ Artist added: {artist_name}")
+        print(f"👤 Artist image added: {artist_name}")
 
 
 # -------------------------------------------------
-# 🔁 AUTO SCAN ALBUMS AND SONGS
+# 🔁 AUTO SCAN ALBUMS & SONGS
 # uploads/songs/Album Name/song.mp3
 # -------------------------------------------------
 async def auto_scan_songs_and_albums():
     if songs_collection is None or albums_collection is None:
-        print("❌ songs_collection or albums_collection not connected")
+        print("❌ DB collections not connected")
         return
 
     if not os.path.exists(SONGS_DIR):
         print("⚠ songs folder not found")
         return
 
-    for album_item in os.listdir(SONGS_DIR):
-        album_path = os.path.join(SONGS_DIR, album_item)
-        if os.path.isdir(album_path):
-            album_title = album_item
+    for item in os.listdir(SONGS_DIR):
+        item_path = os.path.join(SONGS_DIR, item)
 
-            # Check if album already exists
-            existing_album = await albums_collection.find_one({"title": album_title})
-            if existing_album:
-                album_id = existing_album["_id"]
-            else:
-                album_doc = {
-                    "title": album_title,
-                    "cover_image": "",  # optional, can scan folder for first image
-                    "artist_id": None,  # map manually later
-                    "year": None,
-                }
-                result = await albums_collection.insert_one(album_doc)
-                album_id = result.inserted_id
-                print(f"📀 Album added: {album_title}")
+        # ===============================
+        # 📀 ALBUM FOLDER
+        # ===============================
+        if os.path.isdir(item_path):
+            album_title = item
 
-            # Scan songs inside album
-            for song_file in os.listdir(album_path):
+            for song_file in os.listdir(item_path):
                 if not song_file.lower().endswith(SUPPORTED_AUDIO):
                     continue
 
                 song_title = os.path.splitext(song_file)[0]
+                artist_name = detect_artist_from_title(song_title)
 
-                existing_song = await songs_collection.find_one({"title": song_title, "album_id": album_id})
+                artist_id = await get_or_create_artist(artist_name)
+                album_id = await get_or_create_album(album_title, artist_id)
+
+                existing_song = await songs_collection.find_one({
+                    "title": song_title,
+                    "album_id": album_id
+                })
                 if existing_song:
                     continue
 
-                safe_file_name = urllib.parse.quote(song_file)
-                song_doc = {
+                safe_name = urllib.parse.quote(song_file)
+
+                await songs_collection.insert_one({
                     "title": song_title,
-                    "artist_id": None,  # map later
+                    "artist_id": artist_id,
                     "album_id": album_id,
                     "duration": 0,
-                    "audio_url": f"uploads/songs/{urllib.parse.quote(album_title)}/{safe_file_name}",
+                    "audio_url": f"uploads/songs/{urllib.parse.quote(album_title)}/{safe_name}",
                     "cover_image": "",
                     "genre_id": None,
-                }
+                })
 
-                await songs_collection.insert_one(song_doc)
-                print(f"🎵 Song added: {song_title} (Album: {album_title})")
+                print(f"🎵 Song added: {song_title} → {album_title}")
 
-        # Handle loose songs in SONGS_DIR (no album folder)
-        elif os.path.isfile(album_path) and album_item.lower().endswith(SUPPORTED_AUDIO):
-            song_title = os.path.splitext(album_item)[0]
-            existing = await songs_collection.find_one({"title": song_title, "album_id": None})
+        # ===============================
+        # 🎵 LOOSE SONG (NO ALBUM)
+        # ===============================
+        elif os.path.isfile(item_path) and item.lower().endswith(SUPPORTED_AUDIO):
+            song_title = os.path.splitext(item)[0]
+            artist_name = detect_artist_from_title(song_title)
+            artist_id = await get_or_create_artist(artist_name)
+
+            existing = await songs_collection.find_one({
+                "title": song_title,
+                "album_id": None
+            })
             if existing:
                 continue
 
-            safe_file_name = urllib.parse.quote(album_item)
-            song_doc = {
+            safe_name = urllib.parse.quote(item)
+
+            await songs_collection.insert_one({
                 "title": song_title,
-                "artist_id": None,
+                "artist_id": artist_id,
                 "album_id": None,
                 "duration": 0,
-                "audio_url": f"uploads/songs/{safe_file_name}",
+                "audio_url": f"uploads/songs/{safe_name}",
                 "cover_image": "",
                 "genre_id": None,
-            }
-            await songs_collection.insert_one(song_doc)
-            print(f"🎵 Song added: {song_title} (No Album)")
+            })
+
+            print(f"🎵 Loose song added: {song_title}")
 
 
 # -------------------------------------------------
@@ -151,6 +179,8 @@ async def auto_scan_songs_and_albums():
 async def auto_scan_uploads():
     print("🔍 Scanning artists...")
     await auto_scan_artists()
+
     print("🔍 Scanning albums & songs...")
     await auto_scan_songs_and_albums()
+
     print("✅ Auto scan completed")
