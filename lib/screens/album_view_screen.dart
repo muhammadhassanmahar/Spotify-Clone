@@ -17,24 +17,41 @@ class _AlbumViewScreenState extends State<AlbumViewScreen> {
   @override
   void initState() {
     super.initState();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+      final args =
+          ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
       if (args != null) {
         albumData = args;
-        _fetchAlbumSongs(args['id']?.toString() ?? '');
+
+        /// ✅ FIX 1: album id safe way
+        final albumId =
+            args['id']?.toString() ?? args['_id']?.toString() ?? '';
+
+        if (albumId.isNotEmpty) {
+          _fetchAlbumSongs(albumId);
+        } else {
+          debugPrint("❌ Album ID missing");
+          setState(() => isLoading = false);
+        }
       }
     });
   }
 
   Future<void> _fetchAlbumSongs(String albumId) async {
     setState(() => isLoading = true);
+
     try {
       final songs = await ApiService.getAlbumSongs(albumId);
       setState(() {
         albumSongs = songs;
       });
     } catch (e) {
-      debugPrint("Album songs fetch error: $e");
+      debugPrint("❌ Album songs fetch error: $e");
+      setState(() {
+        albumSongs = [];
+      });
     } finally {
       setState(() => isLoading = false);
     }
@@ -44,6 +61,12 @@ class _AlbumViewScreenState extends State<AlbumViewScreen> {
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
     final currentSong = PlayerService.currentSong;
+
+    /// ✅ FIX 2: image url proper
+    final albumCover = albumData?['cover_image'] != null &&
+            albumData!['cover_image'].toString().isNotEmpty
+        ? ApiService.imageUrl(albumData!['cover_image'])
+        : "https://i.scdn.co/image/ab67616d0000b27306ad03c41e6de0569681b89f";
 
     return Scaffold(
       backgroundColor: const Color(0xff121212),
@@ -63,7 +86,8 @@ class _AlbumViewScreenState extends State<AlbumViewScreen> {
 
             Expanded(
               child: isLoading
-                  ? const Center(child: CircularProgressIndicator(color: Colors.green))
+                  ? const Center(
+                      child: CircularProgressIndicator(color: Colors.green))
                   : SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,10 +101,7 @@ class _AlbumViewScreenState extends State<AlbumViewScreen> {
                                 borderRadius: BorderRadius.circular(12),
                                 image: DecorationImage(
                                   fit: BoxFit.cover,
-                                  image: NetworkImage(
-                                    albumData?['cover_image'] ??
-                                        "https://i.scdn.co/image/ab67616d0000b27306ad03c41e6de0569681b89f",
-                                  ),
+                                  image: NetworkImage(albumCover),
                                 ),
                               ),
                             ),
@@ -89,89 +110,32 @@ class _AlbumViewScreenState extends State<AlbumViewScreen> {
                           const SizedBox(height: 20),
 
                           // 🎤 ALBUM TITLE
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.pushNamed(context, "/album_control");
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                albumData?['title'] ?? "Unknown Album",
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 30,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          // ARTIST ROW
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 14,
-                                  backgroundImage: NetworkImage(
-                                    albumData?['artist_image'] ??
-                                        "https://i.scdn.co/image/ab6761610000e5eb35ddc4c4c596cbcac7e0e5aa",
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  albumData?['artist'] ?? "Unknown Artist",
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          const SizedBox(height: 6),
-
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
-                              "Album • ${albumData?['year'] ?? 'Unknown'}",
+                              albumData?['title'] ?? "Unknown Album",
                               style: const TextStyle(
-                                color: Colors.white54,
-                                fontSize: 14,
+                                color: Colors.white,
+                                fontSize: 30,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
 
                           const SizedBox(height: 20),
 
-                          // ❤️ ⬇️ ... + PLAY BUTTON
+                          // ▶ PLAY BUTTON
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Row(
                               children: [
-                                const Icon(Icons.favorite_border,
-                                    color: Colors.white, size: 28),
-                                const SizedBox(width: 18),
-                                const Icon(Icons.download_for_offline_outlined,
-                                    color: Colors.white, size: 27),
-                                const SizedBox(width: 18),
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushNamed(context, "/album_control");
-                                  },
-                                  child: const Icon(Icons.more_vert,
-                                      color: Colors.white, size: 28),
-                                ),
                                 const Spacer(),
-                                // PLAY BUTTON
                                 GestureDetector(
                                   onTap: () {
                                     if (albumSongs.isNotEmpty) {
+                                      /// ✅ FIX 3: play first song correctly
                                       PlayerService.instance.playSong(
-                                        Song.fromJson(albumSongs[0]),
+                                        Song.fromJson(albumSongs.first),
                                       );
                                       setState(() {});
                                     }
@@ -202,12 +166,14 @@ class _AlbumViewScreenState extends State<AlbumViewScreen> {
                               final song = albumSongs[index];
                               final isPlaying = currentSong != null &&
                                   currentSong.id == song['id'];
+
                               return ListTile(
                                 contentPadding:
                                     const EdgeInsets.symmetric(horizontal: 16),
                                 leading: isPlaying
                                     ? const Icon(Icons.graphic_eq,
-                                        size: 22, color: Color(0xff1DB954))
+                                        size: 22,
+                                        color: Color(0xff1DB954))
                                     : const SizedBox(width: 22),
                                 title: Text(
                                   song['title'] ?? 'Unknown',
@@ -220,18 +186,14 @@ class _AlbumViewScreenState extends State<AlbumViewScreen> {
                                   ),
                                 ),
                                 subtitle: Text(
-                                  song['artist'] ?? 'Unknown Artist',
+                                  /// ✅ FIX 4: correct artist key
+                                  song['artist_name'] ??
+                                      song['artist'] ??
+                                      'Unknown Artist',
                                   style: const TextStyle(
                                     color: Colors.white54,
                                     fontSize: 13,
                                   ),
-                                ),
-                                trailing: GestureDetector(
-                                  onTap: () {
-                                    Navigator.pushNamed(context, "/album_control");
-                                  },
-                                  child: const Icon(Icons.more_vert,
-                                      color: Colors.white),
                                 ),
                                 onTap: () {
                                   PlayerService.instance
@@ -252,8 +214,11 @@ class _AlbumViewScreenState extends State<AlbumViewScreen> {
             if (currentSong != null)
               GestureDetector(
                 onTap: () {
-                  Navigator.pushNamed(context, "/track_view",
-                      arguments: currentSong);
+                  Navigator.pushNamed(
+                    context,
+                    "/track_view",
+                    arguments: currentSong,
+                  );
                 },
                 child: Container(
                   padding:
@@ -261,7 +226,6 @@ class _AlbumViewScreenState extends State<AlbumViewScreen> {
                   color: const Color(0xff1F1F1F),
                   child: Row(
                     children: [
-                      // Thumbnail
                       Container(
                         height: 48,
                         width: 48,
@@ -270,13 +234,14 @@ class _AlbumViewScreenState extends State<AlbumViewScreen> {
                           image: DecorationImage(
                             fit: BoxFit.cover,
                             image: NetworkImage(
-                              currentSong.cover ?? albumData?['cover_image'] ?? '',
+                              currentSong.cover ??
+                                  albumData?['cover_image'] ??
+                                  '',
                             ),
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      // Song
                       Expanded(
                         child: Text(
                           currentSong.title,
@@ -287,9 +252,9 @@ class _AlbumViewScreenState extends State<AlbumViewScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
                       IconButton(
-                        icon: const Icon(Icons.pause, color: Colors.white, size: 30),
+                        icon: const Icon(Icons.pause,
+                            color: Colors.white, size: 30),
                         onPressed: () {
                           PlayerService.instance.pauseSong();
                           setState(() {});

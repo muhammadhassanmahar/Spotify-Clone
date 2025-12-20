@@ -43,8 +43,8 @@ flutter:
     - assets/icons/google.png
     - assets/icons/facebook.png
     - assets/icons/twitter.png
-    - assets/icons/whtsapp.png
     - assets/icons/link.png
     - assets/icons/more.png
-    - assets/icons/messages.png
     - assets/images/default.png
+    - assets/icons/whtsapp.png
+    
