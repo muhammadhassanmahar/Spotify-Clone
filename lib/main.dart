@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+
+import 'firebase_options.dart';
 
 import 'screens/album_view_screen.dart';
 import 'screens/track_view_screen.dart';
@@ -17,7 +20,14 @@ import 'screens/signup_screen3.dart';
 import 'screens/search_screen.dart';
 import 'screens/album_control_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // 🔥 FIREBASE INITIALIZE (WEB)
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(const MyApp());
 }
 
