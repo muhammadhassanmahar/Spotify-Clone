@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:spotify/screens/signup_screen2.dart';
 
 class Signup1Screen extends StatefulWidget {
@@ -10,19 +11,65 @@ class Signup1Screen extends StatefulWidget {
 
 class _Signup1ScreenState extends State<Signup1Screen> {
   final TextEditingController emailController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  bool isLoading = false;
+  String? errorMessage;
 
   bool isValidEmail(String email) {
-    // Simple Gmail validation
     final gmailRegex = RegExp(r"^[a-zA-Z0-9._%+-]+@gmail\.com$");
     return gmailRegex.hasMatch(email);
+  }
+
+  Future<void> handleNext() async {
+    final email = emailController.text.trim();
+
+    setState(() {
+      isLoading = true;
+      errorMessage = null;
+    });
+
+    try {
+      // 🔥 Firebase email existence check
+      final methods = await _auth.fetchSignInMethodsForEmail(email);
+
+      if (methods.isNotEmpty) {
+        setState(() {
+          errorMessage = "Email already registered";
+          isLoading = false;
+        });
+        return;
+      }
+
+      // TEMP USER CREATE (password baad me)
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: "TempPassword@123",
+      );
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const Signup2Screen(),
+        ),
+      );
+    } on FirebaseAuthException catch (e) {
+      setState(() {
+        errorMessage = e.message;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Something went wrong";
+      });
+    }
+
+    setState(() => isLoading = false);
   }
 
   @override
   void initState() {
     super.initState();
-    emailController.addListener(() {
-      setState(() {}); // Refresh UI when typing
-    });
+    emailController.addListener(() => setState(() {}));
   }
 
   @override
@@ -47,7 +94,8 @@ class _Signup1ScreenState extends State<Signup1Screen> {
                     children: [
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
-                        child: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                        child: const Icon(Icons.arrow_back,
+                            color: Colors.white, size: 28),
                       ),
                     ],
                   ),
@@ -89,9 +137,18 @@ class _Signup1ScreenState extends State<Signup1Screen> {
                         borderRadius: BorderRadius.circular(6),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 18),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 18),
                     ),
                   ),
+
+                  if (errorMessage != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      errorMessage!,
+                      style: const TextStyle(color: Colors.redAccent),
+                    ),
+                  ],
 
                   const SizedBox(height: 6),
                   const Text(
@@ -103,30 +160,30 @@ class _Signup1ScreenState extends State<Signup1Screen> {
 
                   Center(
                     child: ElevatedButton(
-                      onPressed: isButtonEnabled
-                          ? () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const Signup2Screen(),
-                                ),
-                              );
-                            }
-                          : null,
+                      onPressed:
+                          isButtonEnabled && !isLoading ? handleNext : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: isButtonEnabled
                             ? Colors.green
                             : Colors.grey.shade700,
-                        padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 40, vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        disabledBackgroundColor: Colors.grey.shade700,
                       ),
-                      child: const Text(
-                        "Next",
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
+                      child: isLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                  strokeWidth: 2, color: Colors.white),
+                            )
+                          : const Text(
+                              "Next",
+                              style: TextStyle(
+                                  color: Colors.white, fontSize: 16),
+                            ),
                     ),
                   ),
                 ],
