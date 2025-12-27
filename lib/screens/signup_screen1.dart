@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:spotify/screens/signup_screen2.dart';
+import 'signup_screen2.dart';
 
 class Signup1Screen extends StatefulWidget {
   const Signup1Screen({super.key});
@@ -17,8 +17,8 @@ class _Signup1ScreenState extends State<Signup1Screen> {
   String? errorMessage;
 
   bool isValidEmail(String email) {
-    final gmailRegex = RegExp(r"^[a-zA-Z0-9._%+-]+@gmail\.com$");
-    return gmailRegex.hasMatch(email);
+    final regex = RegExp(r'^[\w\.-]+@gmail\.com$');
+    return regex.hasMatch(email);
   }
 
   Future<void> handleNext() async {
@@ -30,39 +30,39 @@ class _Signup1ScreenState extends State<Signup1Screen> {
     });
 
     try {
-      // 🔥 Firebase email existence check
-      final methods = await _auth.fetchSignInMethodsForEmail(email);
-
-      if (methods.isNotEmpty) {
-        setState(() {
-          errorMessage = "Email already registered";
-          isLoading = false;
-        });
-        return;
-      }
-
-      // TEMP USER CREATE (password baad me)
       await _auth.createUserWithEmailAndPassword(
         email: email,
-        password: "TempPassword@123",
+        password: "TempPassword@123", // temporary
       );
+
+      if (!mounted) return;
 
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => const Signup2Screen(),
+          builder: (_) => const Signup2Screen(),
         ),
       );
     } on FirebaseAuthException catch (e) {
+      if (!mounted) return;
+
       setState(() {
-        errorMessage = e.message;
+        if (e.code == 'email-already-in-use') {
+          errorMessage = "Email already registered";
+        } else if (e.code == 'invalid-email') {
+          errorMessage = "Invalid email address";
+        } else {
+          errorMessage = e.message;
+        }
       });
-    } catch (e) {
+    } catch (_) {
+      if (!mounted) return;
       setState(() {
         errorMessage = "Something went wrong";
       });
     }
 
+    if (!mounted) return;
     setState(() => isLoading = false);
   }
 
@@ -78,119 +78,101 @@ class _Signup1ScreenState extends State<Signup1Screen> {
 
     return Scaffold(
       backgroundColor: Colors.black,
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          double width = constraints.maxWidth;
-          double padding = width > 600 ? width * 0.2 : 20;
+      body: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: 30),
 
-          return SingleChildScrollView(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: padding, vertical: 40),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 20),
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Navigator.pop(context),
-                        child: const Icon(Icons.arrow_back,
-                            color: Colors.white, size: 28),
-                      ),
-                    ],
-                  ),
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: const Icon(Icons.arrow_back, color: Colors.white),
+            ),
 
-                  const SizedBox(height: 30),
-                  const Center(
-                    child: Text(
-                      "Create account",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
+            const SizedBox(height: 40),
 
-                  const SizedBox(height: 40),
-                  const Text(
-                    "What's your email?",
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  TextField(
-                    controller: emailController,
-                    style: const TextStyle(color: Colors.white),
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.grey.shade800,
-                      hintText: "Email",
-                      hintStyle: const TextStyle(color: Colors.white54),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(6),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 18),
-                    ),
-                  ),
-
-                  if (errorMessage != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      errorMessage!,
-                      style: const TextStyle(color: Colors.redAccent),
-                    ),
-                  ],
-
-                  const SizedBox(height: 6),
-                  const Text(
-                    "You'll need to confirm this email later.",
-                    style: TextStyle(color: Colors.white54, fontSize: 12),
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  Center(
-                    child: ElevatedButton(
-                      onPressed:
-                          isButtonEnabled && !isLoading ? handleNext : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isButtonEnabled
-                            ? Colors.green
-                            : Colors.grey.shade700,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 40, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(30),
-                        ),
-                      ),
-                      child: isLoading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                  strokeWidth: 2, color: Colors.white),
-                            )
-                          : const Text(
-                              "Next",
-                              style: TextStyle(
-                                  color: Colors.white, fontSize: 16),
-                            ),
-                    ),
-                  ),
-                ],
+            const Center(
+              child: Text(
+                "Create account",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          );
-        },
+
+            const SizedBox(height: 40),
+
+            const Text(
+              "What's your email?",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+
+            const SizedBox(height: 10),
+
+            TextField(
+              controller: emailController,
+              style: const TextStyle(color: Colors.white),
+              keyboardType: TextInputType.emailAddress,
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.grey.shade800,
+                hintText: "Email",
+                hintStyle: const TextStyle(color: Colors.white54),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+
+            if (errorMessage != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                errorMessage!,
+                style: const TextStyle(color: Colors.redAccent),
+              ),
+            ],
+
+            const SizedBox(height: 30),
+
+            Center(
+              child: ElevatedButton(
+                onPressed:
+                    isButtonEnabled && !isLoading ? handleNext : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                      isButtonEnabled ? Colors.green : Colors.grey,
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 40, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                ),
+                child: isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        "Next",
+                        style:
+                            TextStyle(color: Colors.white, fontSize: 16),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
