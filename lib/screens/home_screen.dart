@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../services/api_service.dart';
@@ -33,6 +34,15 @@ class _HomeScreenState extends State<HomeScreen> {
     songsFuture = ApiService.getAllSongs();
   }
 
+  /// 🔥 helper: random limited songs
+  List<dynamic> pickRandomSongs(List<dynamic> songs, int limit) {
+    if (songs.length <= limit) return songs;
+
+    final random = Random();
+    final shuffled = List<dynamic>.from(songs)..shuffle(random);
+    return shuffled.take(limit).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -65,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 10),
 
-            /// 🔥 BACKEND SONGS (HORIZONTAL)
+            /// 🔥 BACKEND SONGS (LIMITED)
             SizedBox(
               height: 150,
               child: FutureBuilder<List<dynamic>>(
@@ -97,15 +107,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   }
 
-                  final songs = snapshot.data!;
+                  final songs =
+                      pickRandomSongs(snapshot.data!, 8);
 
                   return ListView.builder(
                     scrollDirection: Axis.horizontal,
                     itemCount: songs.length,
                     itemBuilder: (context, index) {
                       final song = songs[index];
-
-                      final coverImage = song['cover_image'] ?? "uploads/default.png";
+                      final coverImage =
+                          song['cover_image'] ?? "uploads/default.png";
 
                       return GestureDetector(
                         onTap: () {
@@ -138,7 +149,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(height: 5),
                               Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 6),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 6),
                                 child: Text(
                                   song['title'] ?? "Unknown",
                                   maxLines: 1,
@@ -171,29 +183,31 @@ class _HomeScreenState extends State<HomeScreen> {
 
             const SizedBox(height: 10),
 
-            /// 🔥 SAME BACKEND DATA (GRID)
+            /// 🔥 GRID (LIMITED)
             FutureBuilder<List<dynamic>>(
               future: songsFuture,
               builder: (context, snapshot) {
-                if (!snapshot.hasData) {
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
                   return const SizedBox();
                 }
 
-                final songs = snapshot.data!;
+                final songs =
+                    pickRandomSongs(snapshot.data!, 6);
 
                 return GridView.builder(
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: songs.length,
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  gridDelegate:
+                      const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                   ),
                   itemBuilder: (context, index) {
                     final song = songs[index];
-
-                    final coverImage = song['cover_image'] ?? "uploads/default.png";
+                    final coverImage =
+                        song['cover_image'] ?? "uploads/default.png";
 
                     return GestureDetector(
                       onTap: () {
@@ -224,7 +238,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             const SizedBox(height: 8),
                             Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 6),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 6),
                               child: Text(
                                 song['title'] ?? "Unknown",
                                 maxLines: 1,

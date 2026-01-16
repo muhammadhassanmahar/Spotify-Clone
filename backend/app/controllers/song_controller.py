@@ -45,7 +45,7 @@ async def enrich_song(song: dict):
             album_name = album.get("title")
 
     # -------------------------
-    # Audio path (🔥 CRITICAL FIX)
+    # Audio path
     # -------------------------
     audio_url = (
         song.get("audio_url")
@@ -69,8 +69,8 @@ async def enrich_song(song: dict):
         "artist_name": artist_name,
         "album_name": album_name,
         "duration": song.get("duration", 0),
-        "audio_url": audio_url,          # ✅ Flutter expects this
-        "cover_image": cover_image,       # ✅ empty allowed
+        "audio_url": audio_url,
+        "cover_image": cover_image,
         "genre_id": song.get("genre_id"),
     }
 
@@ -110,6 +110,20 @@ async def get_all_songs():
     songs = []
     async for song in songs_collection.find():
         songs.append(await enrich_song(song))
+    return songs
+
+
+# -------------------------------------------------
+# 🎶 GET SONGS BY ALBUM ID  ✅ (ALBUM ISSUE FIX)
+# -------------------------------------------------
+async def get_songs_by_album(album_id: str):
+    if not ObjectId.is_valid(album_id):
+        raise HTTPException(status_code=400, detail="Invalid album ID")
+
+    songs = []
+    async for song in songs_collection.find({"album_id": album_id}):
+        songs.append(await enrich_song(song))
+
     return songs
 
 
